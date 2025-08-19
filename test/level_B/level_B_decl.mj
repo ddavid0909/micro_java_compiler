@@ -1,0 +1,56 @@
+// Test301
+
+program test301
+
+const int nula = 0;
+const int jedan = 1;
+const int pet = 5;
+
+int niz[];
+char nizch[];
+
+int a;
+
+set s1, s2, s3;
+	
+{
+
+	void main()	
+		int bodovi;
+		int temp;
+		bool k;
+	{
+		bodovi = 5;
+		temp = 4;
+		k = true;
+		print(1);
+		if (bodovi == temp) {
+			print(2);
+		} else {
+			print(3);
+		}
+		if (k) {
+			print(4);
+		}
+		if (3 == 3) {
+			print(5);
+			if (4 == 5) {
+				print(6);
+			} else {
+				if (4 >= 3 || 5 == 4) {
+					print(7);
+				} else {
+					if (4 == 3 || 5 == 4 || 5 == 5) {
+						print(8);
+					}
+				}
+			}
+		}
+		if (3 == 3 && 4 == 3) {
+			print(9);
+		}
+	}
+	
+}
+
+

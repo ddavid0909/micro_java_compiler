@@ -1,0 +1,19 @@
+program MJProgram
+	int a;
+	int b;
+	const int c = 5, d = 6;
+	const char f = 't', g = 'a';
+	const bool h = true, i = false;
+	// ispod su neispravni izrazi
+	const bool j = 4, k = '5', l = true;
+	const int m = 4, n = 7;
+	
+{
+	int main() {
+		x = y + 5 + 3;
+		print(1);
+		print(2);
+		
+		k();
+	}
+}

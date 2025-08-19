@@ -1,0 +1,44 @@
+program testMeth
+// objekat klase se pravi unutar druge klase, pa moze da se desi da se ne upise lepo pocetak virtuelne tabele
+int a;
+int b;
+class S {
+
+	int s;
+
+	{
+	
+		void methS(){
+			print(this.s); //10
+		}
+	
+	
+	}
+
+
+}
+
+class A {
+
+	S objS;
+	
+	{
+	
+		void meth1(){
+			this.objS = new S();
+			this.objS.s = 10;
+			this.objS.methS();
+		}
+	
+	}
+}
+
+{
+
+	void main()A objA;{
+		objA = new A();
+		objA.meth1();
+		
+	}
+
+}

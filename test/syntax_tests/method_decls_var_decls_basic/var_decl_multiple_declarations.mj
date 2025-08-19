@@ -1,0 +1,9 @@
+program MJProgram
+	bool my_var[];
+	int x;
+	bool y;
+	char c;
+	char t[];
+	
+{
+	}

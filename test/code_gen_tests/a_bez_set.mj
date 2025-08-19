@@ -1,0 +1,108 @@
+// Test301
+
+program test301
+
+const int nula = 0;
+const int jedan = 1;
+const int pet = 5;
+const int dva = 2;
+
+int niz[];
+char nizch[];
+set set_1;
+set set_2;
+int a;
+
+	
+{
+
+	void main()	
+		set set_3;
+		int bodovi;
+		int temp;
+	{
+		set_1 = new set[6];
+		set_2 = new set[3];
+		set_3 = new set[15];
+		bodovi = 0;
+		print(bodovi);
+		bodovi++;
+		print(bodovi);
+		bodovi = bodovi + jedan;
+		print(bodovi);
+		bodovi = bodovi * pet;
+		print(bodovi);
+		bodovi--;
+		print(bodovi); //9
+		print(eol);
+		
+		niz = new int[5];
+		print(eol);
+		print(niz[0]);
+		print(eol);
+		niz[nula] = dva;
+		niz[jedan] = 3;
+		niz[niz[nula]] = niz[niz[1]-1] * 4;
+		niz[2] = 9;
+		temp = 2;
+		print(niz[temp]);
+		bodovi = niz[2]/niz[0];
+		print(bodovi); //6
+		print(eol);
+		print(niz[2]); //12
+		print(eol);
+		
+		nizch = new char[3];
+		nizch[0] = 'a';
+		nizch[jedan] = 'b';
+		nizch[pet - 3] = 'c';
+		print(nizch[1]); //b
+		print(eol);
+		print(nizch[jedan * 2]); //c
+		print(eol);
+		print(ord(nizch[0])); //97
+			
+		a=1;
+		read(bodovi);
+		print(bodovi);
+		bodovi = -bodovi + (pet * a / 2 - nula) * bodovi - (3 % 2 + 3 * 2 - 7)+2; 
+		print(bodovi); //bodovi
+		
+		niz[0] = 1; niz[1] = 2; niz[2] = 3;
+		print(bodovi);
+		bodovi = 2;
+		bodovi = bodovi * niz[2];
+		print(bodovi);
+		add(set_1, 1);
+		add(set_1, 2);
+		add(set_1, 2);
+		add(set_1, 1);
+		add(set_1, 10);
+		add(set_1, 20);
+		print(eol);
+		//print(set_1);
+		print(eol);
+		niz[0] = 2;
+		niz[1] = 2;
+		niz[2] = 5;
+		niz[3] = 7;
+		niz[4] = 7;
+		addAll(set_1, niz);
+		add(set_2, 99);
+		print(eol);
+		print(set_1);
+		print(eol);
+		print(set_2);
+		print(eol);
+		add(set_3,11);
+		print(set_3);
+		print(eol);
+		set_3 = set_1 union set_2;
+		print(set_3);
+		print(eol);
+		print('D');
+	}
+	
+}
+
+

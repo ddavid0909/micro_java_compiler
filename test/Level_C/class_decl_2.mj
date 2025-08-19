@@ -1,0 +1,43 @@
+program MJProgram
+	int global_a;
+	int global_b;
+	class Class_1 {
+		int a, b;
+		int c[];
+		char d[];
+		{
+			int m() {
+				return -1;
+			}
+			int class_1_meth(int t, int k) {
+				print(99);
+				this.a = 5;
+				this.b = 0;
+				print(m());
+				b = 57;
+				print(b);
+				c = new int[5];
+				c[0] = 5;
+				print(t);
+				return 1;
+			}
+		}
+	}
+	
+{
+	void main() Class_1 new_var; { 
+		new_var = new Class_1();
+		new_var = new Class_1();
+		new_var.d = new char[20];
+		new_var.a = 15;
+		print(new_var.VTP);
+		print(new_var.a); // 15
+		new_var.d[5] = 'c';
+		print(new_var.d[5]); // c
+		new_var.c = new int[20];
+		new_var.c[0] = 5;
+		print(new_var.d[new_var.c[0]]); // c
+		//print(new_var.m());
+		new_var.class_1_meth(2, 0); // 57 2
+	}
+}

@@ -1,0 +1,47 @@
+program InterfaceDecl
+
+interface Interface_1 {
+	
+	int display() {
+		return 0;
+	}
+	int height();
+	
+	int k(int a, int b, int c);
+}
+
+class Class_1 extends Interface_1 {
+{
+	int height() {
+		return 5;
+	}
+	void display() {
+		
+	}
+	int k(char a, int b, int c) {
+		return ord(a);
+	}
+	}
+}
+
+class Class_2 extends Interface_1 {
+	{
+		int height() {
+			return 7;
+		}
+		int display(int k) {
+			return k;
+		}
+		int k(int a, int b, int c) {
+			return a + b + c;
+		}
+	}
+}
+
+{
+	void main() Interface_1 c; {
+		c = new Class_1();
+		print(c.height());
+		print(c.display());
+	}
+}

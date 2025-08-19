@@ -1,0 +1,44 @@
+program MJProgram
+	// ispis osnovnih tipova podataka i rad aritmetickih izraza. Osim toga radi i poziv funkcija sa i bez formalnih parametara.
+	const int c = 5, d = 6;
+	const char f = 't', g = 'a';
+	const bool h = true, i = false;
+	const int k = 4;
+	int x, y, arr[];
+
+{
+	int inc_x(int k, int p, int t) {x = x + k; return x;}
+	int no_side_effect(int k, bool p) int m; { m = 3; return m; }
+	int main() 
+	int t;
+	{
+		x = 3;
+		arr = new int[5+x];
+		print(len(arr)); 
+		arr[0] = 5;
+		arr[5] = 10;
+		arr[6] = -(x+3+arr[0])+5;
+		arr[arr[0]+2] = 12;
+		arr[arr[4]+x+1] = arr[arr[0]]*4;
+		print(arr[1]); // arr[1] = 0
+		print(arr[arr[1]]); // arr[0] = 5
+		print(arr[arr[arr[1]]]); // arr[5] = 10
+		print(arr[7]); // 12
+		print(arr[4]); // 40
+		print(1);
+		print(ord('c'));
+		print(chr(99));
+		print(arr[6]);
+		print(2+3-7*2+15+(32-31));
+		print('c');
+		print(true);
+		print(false);
+		print(x*2+k);
+		print(k, 2);
+		print(f);
+		no_side_effect(2, true);
+		print(inc_x(5, 4, 2));
+		print(x);
+	}
+	
+}

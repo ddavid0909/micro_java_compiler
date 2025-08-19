@@ -1,0 +1,40 @@
+// TestDesignator
+
+program testDesignator
+
+const int nula = 0;
+const int jedan = 1;
+const int pet = 5;
+
+int niz[];
+char nizch[];
+
+int a;
+
+set s1, s2, s3;
+	
+{
+
+	void main()	
+		int bodovi;
+		int temp;
+		bool k;
+	{
+		niz = new int[20];
+		niz[12] = -5;
+		print(niz[12]);
+		niz[19] = 12;
+		print(niz[19]);
+		print(niz[niz[19]]);
+		
+		read(niz[niz[19]]);
+		print(niz[niz[19]]);
+		s1 = new set[10];
+		add(s1, 1);
+		add(s1, 2);
+		print(s1, 5);
+	}
+	
+}
+
+

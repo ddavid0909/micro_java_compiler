@@ -1,0 +1,110 @@
+program MJProgram
+	int a, b;
+	int b;
+	const int c = 5, d = 6;
+	const char f = 't', g = 'a';
+	int aa[], bb, cc[], dd[], ee;
+	const bool h = true, i = false;
+	// ispod su neispravni izrazi
+	const bool j = 4, k = '5', l = true;
+	char ff[], gg, hh[];
+	bool r, s, t;
+	const int m = 4, n = 7;
+	char x, y, q;
+	
+	class Class_1 {
+		int a, b;
+		int c[];
+		char d[], e, f[];
+		{
+		}
+	}
+	
+	class Class_2 extends Class_1 {
+		int r7;
+		{
+			int class_2_first_meth()
+			{
+				return 1;
+			}
+			int class_2_func(char k, int q, int func_int_arr[])
+				int not_parameter;
+			 {
+				return 1;
+			}
+			void class_2_proc(char k, int q, int proc_int_arr[]) 
+				int not_parameter_1;
+				int not_parameter_2[];
+				char not_parameter_3[];
+			{
+				return;
+			}
+		}
+	}
+	
+	class Class_3 extends Class_2 {
+		int r8;
+		char r9[];
+		char r10[];
+		bool r11[];
+		Class_2 arr[];
+		{
+		int class_3_new_meth(int t, int p, char q)
+			char class_3_char;
+			bool class_3_bool;
+			{
+				return 3;
+			}
+		void class_3_another_meth()
+			char class_3_char;
+			bool class_3_bool;
+			{
+				return;
+			}	
+		int class_2_func(char a, int b, int der_arr[])
+			{
+				return 2;
+			}
+		}
+	}
+	
+	class Class_4 extends int {
+		
+	}
+	
+	class Class_5 {
+		Class_2 class_field[];
+		Class_3 class_field_1[];
+		{
+			char class_5_meth_1(char class_5_a, char class_5_arr[]) 
+				char class_5_not_parameter;
+			{
+				return 'c';
+			}
+			void class_5_meth_2(char class_5_a) {
+				return;
+			}
+		}
+	}
+	
+{
+	int main(bool main_a[], char main_c[], int main_b
+	) 
+		int a[], b, c[];
+		bool d[];
+	{
+		x = y + 5 + 3;
+		print(1);
+		print(2);
+		
+		k();
+	}
+	
+	char k_func(bool k_a[], char k_c, bool k_b, int k_arr[]
+	)
+		int k_zz;
+		bool k_z_k[];
+	{
+		return 5;
+	}
+}

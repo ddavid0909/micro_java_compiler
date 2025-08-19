@@ -1,0 +1,37 @@
+program MJProgram
+	bool my_var[];
+	int x;
+	interface D {}
+	class B {
+		bool my_var[];
+		int x;
+		bool y;
+		char c;
+		char t[];
+	}
+	bool y;
+	char c;
+	char t[];
+	class A extends B {
+		bool my_var[];
+		int x;
+		bool y;
+		char c;
+		char t[];
+		{
+		int int_meth()
+		}
+	}
+	interface C {
+		void k();
+		int ml();
+		void t(int m, int g);
+		int l(char t, A k);
+		int int_meth()
+			int k, m[];
+			int t;
+			{}
+		;
+		}
+{
+	}

@@ -1,0 +1,42 @@
+program remove_mj
+set a, b, c;
+int arr[];
+{
+	void main() {
+		a = new set[20];
+		add(a,5);
+		add(a,6);
+		print(a); // 5, 6
+		print(eol);
+		remove(a,5);
+		print(a); // 6
+		print(eol);
+		remove(a,8); 
+		print(a); // 6
+		print(eol);
+		add(a,7);
+		add(a,8);
+		remove(a,6);
+		print(a); // 8 7
+		print(eol);
+		remove(a,7);
+		print(a);
+		print(eol); // 8
+		remove(a,8);
+		print(a); //prazno
+		print(eol);
+		arr = new int[5];
+		arr[0] = 1;
+		arr[1] = 2;
+		arr[2] = 3;
+		arr[3] = 3;
+		arr[4] = 3;
+		addAll(a, arr);
+		print(a); // 1 2 3
+		print(eol);
+		
+		remove(a,1);
+		print(a); // 3 2
+		
+	}
+}

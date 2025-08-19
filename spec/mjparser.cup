@@ -1,0 +1,417 @@
+package rs.ac.bg.etf.pp1;
+
+import java_cup.runtime.*;
+import org.apache.log4j.*;
+import rs.ac.bg.etf.pp1.ast.*;
+
+parser code {:
+	
+	boolean errorDetected;
+	Logger log = Logger.getLogger(getClass());
+	
+	public void report_fatal_error(String message, Object info) throws java.lang.Exception {
+		done_parsing();
+		report_error(message, info);
+	}
+	
+	public void syntax_error(Symbol cur_token) {
+		report_error("\nSintaksna greska ", cur_token);
+	}
+	
+	public void unrecovered_syntax_error(Symbol cur_token) throws java.lang.Exception {
+		report_fatal_error("Fatalna greska, parsiranje se ne moze nastaviti", cur_token);
+	}
+	
+	public void report_error(String message, Object info) {
+		errorDetected = true;
+		StringBuilder msg = new StringBuilder(message);
+		if (info instanceof Symbol)
+			msg.append(" na liniji ").append(((Symbol)info).left);
+		log.error(msg.toString());
+	}
+
+:}
+
+init with {:
+	errorDetected = false;
+:}
+
+scan with {:
+	Symbol s = this.getScanner().next_token();
+	if (s != null && s.value != null)
+		log.info(s.toString() + " " + s.value.toString());
+	return s;
+:}
+terminal PROG, BREAK, CLASS, ELSE, CONST, IF, NEW, PRINT, READ, RETURN, VOID, EXTENDS, CONTINUE, UNION, INTERSECT, DO, WHILE, MAP, INTERFACE, PLUS, MINUS, MULTIPLY, DIVIDE, PERCENT, IS_E, IS_NE, IS_GT, IS_GTE, IS_LT, IS_LTE, LOGICAL_AND, LOGICAL_OR, EQUAL, INC, DEC, SEMI, COLUMN, COMMA, DOT, L_BRACKET_CURVED, R_BRACKET_CURVED, L_BRACKET_SQUARED, R_BRACKET_SQUARED, L_BRACKET_CURLY, R_BRACKET_CURLY, DUAL_INC, HASH;
+terminal Integer NUMBER;
+terminal String IDENT;
+terminal Character CHAR;
+terminal Boolean BOOL;
+
+
+nonterminal rs.etf.pp1.symboltable.concepts.Obj Program;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj ProgName;
+
+nonterminal VarDeclList;
+nonterminal MethodDeclList;
+
+nonterminal rs.etf.pp1.symboltable.concepts.Struct Type;
+
+nonterminal rs.etf.pp1.symboltable.concepts.Obj ConstDecl;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj NextConstDecl;
+nonterminal rs.etf.pp1.symboltable.concepts.Struct OneConst;
+nonterminal CurConstType;
+
+nonterminal rs.etf.pp1.symboltable.concepts.Obj VarDecl;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj NextVarDecl;
+nonterminal rs.etf.pp1.symboltable.concepts.Struct ArrayVar;
+nonterminal CurVarType;
+
+nonterminal rs.etf.pp1.symboltable.concepts.Obj ClassDecl;
+nonterminal ClassDeclStart;
+nonterminal ClassFields;
+nonterminal ClassMethods;
+nonterminal ExtendsDecl;
+
+nonterminal rs.etf.pp1.symboltable.concepts.Obj MethodDecl;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj MethodSignature;
+nonterminal MethodParamsList;
+
+nonterminal rs.etf.pp1.symboltable.concepts.Obj InterfaceDecl;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj InterfaceDeclStart;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj InterfaceMethods;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj InterfaceMethodDeclaration;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj InterfaceMethodSignature;
+
+nonterminal rs.etf.pp1.symboltable.concepts.Obj FormParsList;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj FormPars;
+nonterminal FormParsType;
+
+nonterminal StatementList;
+nonterminal Statement;
+nonterminal DesignatorStatement;
+
+nonterminal ActPars;
+nonterminal ActParsNext;
+nonterminal ActParsList;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj ActParam;
+nonterminal BracedActParsList;
+nonterminal FuncCallStart;
+nonterminal FuncCallEnd;
+
+nonterminal rs.etf.pp1.symboltable.concepts.Obj Term;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj TermNext;
+
+nonterminal rs.etf.pp1.symboltable.concepts.Obj Factor;
+nonterminal Setop;
+nonterminal Mulop;
+nonterminal Addop;
+nonterminal Relop;
+nonterminal Assignop;
+
+nonterminal rs.etf.pp1.symboltable.concepts.Obj Expr;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj ExprNext;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj ExprOrNone;
+nonterminal Label;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj DesignatorList;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj DesignatorNext;
+
+nonterminal rs.etf.pp1.symboltable.concepts.Obj DesignatorIdentifier;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj ArrayIdentifier;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj MemberIdentifier;
+
+nonterminal DoWhileConditionList;
+nonterminal DoStart;
+nonterminal DoWhileSuccess;
+nonterminal Condition;
+nonterminal IfStart;
+nonterminal ElseStart;
+nonterminal CondTerm;
+nonterminal CondTermStart;
+nonterminal OrConditionList;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj  CondFact;
+nonterminal AndConditionList;
+nonterminal RelExprOrNone;
+
+nonterminal rs.etf.pp1.symboltable.concepts.Obj FunctionTypeName;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj ProcedureTypeName;
+
+precedence left ELSE; 
+
+Program ::= (Program) PROG ProgName:p VarDeclList L_BRACKET_CURLY MethodDeclList R_BRACKET_CURLY;
+
+ProgName ::= (ProgName) IDENT:progName;
+
+/* VARIABLE DECLARATION LIST */
+VarDeclList ::= (Constants) VarDeclList ConstDecl
+				|
+				(Variables) VarDeclList VarDecl
+				|
+				(Classes) VarDeclList ClassDecl
+				|
+				(Interfaces) VarDeclList InterfaceDecl
+				|
+				(NoVariableDeclaration) /* epsilon */
+				;
+				
+/* CONSTANT DELCARATION */
+ConstDecl ::= (ConstDeclaration) CONST CurConstType NextConstDecl IDENT:constName EQUAL OneConst:constVal SEMI
+			  ;
+			  
+CurConstType ::= (CurConstType) Type:constType;
+			  
+NextConstDecl ::= (NextConstDeclaration) NextConstDecl IDENT:constName EQUAL OneConst:constVal COMMA
+				  |
+				  (NoNextConstDecl) /* epsilon */
+				  ;
+OneConst ::= (NumberConstant) NUMBER:value |
+			 (CharacterConstant) CHAR:value | 
+			 (BooleanConstant) BOOL:value 
+			 ;
+
+Type ::= (Type) IDENT:typeName;
+
+MethodDeclList ::= (MethodDeclarationList) MethodDecl MethodDeclList 
+				   |
+ 				   (MethodDeclarationListEnd) /* epsilon */
+ 				   ;
+
+/* VARIABLE DECLARATION */
+VarDecl ::= (VariableDeclaration) CurVarType NextVarDecl IDENT:varName ArrayVar:isArrayVar SEMI
+			|
+			(ErrorInVariableDeclaration) error NextVarDecl SEMI
+			;
+			
+CurVarType ::= (CurVarType) Type:varType;
+NextVarDecl ::= (NextVariableDeclaration) NextVarDecl IDENT:varName ArrayVar:isArrayVar COMMA
+				|
+				/* epsilon */
+				|
+				(ErrorInNextVariableDeclaration) NextVarDecl error
+				;
+ArrayVar ::= (IsArrayVar) L_BRACKET_SQUARED R_BRACKET_SQUARED
+			 |
+			 (IsNotArrayVar) /* epsilon */
+			 ;
+
+/* CLASS DECLARATION */
+ClassDecl ::= (ClassDeclaration) CLASS ClassDeclStart ExtendsDecl L_BRACKET_CURLY ClassFields ClassMethods R_BRACKET_CURLY;
+
+ClassDeclStart ::= (ClassDeclStart) IDENT:className;
+
+ExtendsDecl ::= (ExtendsDeclaration) EXTENDS Type:superclassName 
+				 |
+				 (NoExtendsDeclaration) /* epsilon */
+				 |
+				 (ErrorExtendsDeclaration) error 
+				 ;
+ClassFields ::= (ClassFieldDeclaration) VarDecl ClassFields
+				|
+				(NoClassFieldsDeclaration) /* epsilon */
+				;
+ClassMethods ::= (ClassMethodDeclaration) L_BRACKET_CURLY MethodDeclList R_BRACKET_CURLY
+				|
+				(NoClassMethodDeclaration) /* epsilon */
+				;
+
+
+
+/* INTERFACE DECLARATION */
+InterfaceDecl ::= (InterfaceDecl) INTERFACE InterfaceDeclStart L_BRACKET_CURLY InterfaceMethods R_BRACKET_CURLY;
+InterfaceDeclStart ::= (InterfaceDeclStart) IDENT:interfaceName;
+InterfaceMethods ::= 
+				(InterfaceMethodsDeclaration) InterfaceMethodDeclaration InterfaceMethods
+				|
+				(InterfaceMethodsSignature) InterfaceMethodSignature SEMI InterfaceMethods
+				|
+				(NoInterfaceMethods) /* epsilon */;
+				
+InterfaceMethodDeclaration ::= (InterfaceMethodDeclaration) MethodDecl;
+InterfaceMethodSignature ::= (InterfaceMethodSignature) MethodSignature;
+
+/* METHOD DECLARATION LIST */
+
+MethodDecl ::= (MethodDeclaration) MethodSignature MethodParamsList L_BRACKET_CURLY StatementList R_BRACKET_CURLY;
+
+MethodParamsList ::= (MethodParametersList) MethodParamsList VarDecl
+					 |
+					 (NoMethodParametersList)/* epsilon */
+					 ;
+
+MethodSignature ::= (FunctionSignature) FunctionTypeName L_BRACKET_CURVED FormParsList R_BRACKET_CURVED 
+					|
+					(ProcedureSignature) ProcedureTypeName L_BRACKET_CURVED FormParsList R_BRACKET_CURVED
+					;
+					
+FunctionTypeName ::= (FunctionTypeName) Type:retType IDENT:functionName;
+
+ProcedureTypeName ::= (ProcedureTypeName) VOID IDENT:procedureName;
+
+FormParsList ::= (FormalParametersList) FormPars FormParsType IDENT:formParName ArrayVar:isArrayVar
+				 |
+				 (NoFormalParametersList) /* epsilon */
+				 |
+				 (ErrorFormalParametersList) FormPars error
+				 ;
+				 
+FormParsType ::= (FormParsType) Type:formParType;
+
+FormPars ::= (FormalParameter) FormPars FormParsType IDENT:formParName ArrayVar:isArrayVar COMMA 
+			 |
+			 (NoFormalParameter) /* epsilon */
+			 | 
+			 (ErrorFormalParameter) FormPars error
+			 ;
+
+/* STATEMENT */
+
+StatementList ::= (StatementListExists) Statement StatementList
+				  |
+				  (NoStatementList) /* epsilon */
+				  ;
+Statement ::= (BreakStatement) BREAK SEMI
+			  |
+			  (BreakNumStatement) BREAK HASH NUMBER:number SEMI
+			  |
+			  (ContinueStatement) CONTINUE SEMI
+			  |
+			  (NestedStatementList) L_BRACKET_CURLY StatementList R_BRACKET_CURLY
+			  |
+			  (ReadStatement) READ L_BRACKET_CURVED DesignatorList R_BRACKET_CURVED SEMI
+			  |
+			  (ReturnStatement) RETURN ExprOrNone SEMI
+			  |
+			  (ADesignatorStatement) DesignatorStatement SEMI
+			  |
+			  (PrintStatementNoNumber) PRINT L_BRACKET_CURVED Expr R_BRACKET_CURVED SEMI
+			  |
+			  (PrintStatementYesNumber) PRINT L_BRACKET_CURVED Expr COMMA NUMBER:number R_BRACKET_CURVED SEMI
+			  |
+			  (IfStatement) IF L_BRACKET_CURVED Condition IfStart Statement
+			  |
+			  (IfElseStatement) IF L_BRACKET_CURVED Condition IfStart Statement ElseStart Statement
+			  |
+			  (DoWhileStatement) DoStart Statement WHILE L_BRACKET_CURVED DoWhileConditionList R_BRACKET_CURVED SEMI
+			  ;
+DoStart ::= (DoStart) DO;
+IfStart ::= (IfStart) R_BRACKET_CURVED;
+ElseStart ::= (ElseStart) ELSE;
+
+DoWhileConditionList ::= (OneDoWhileCondition) Condition
+						 |
+						 (MoreDoWhileConditions) Condition DoWhileSuccess DesignatorStatement
+						 |
+						 (NoDoWhileCondition) /* epsilon */
+						 ;
+
+DoWhileSuccess ::= (DoWhileSuccess) COMMA;
+DesignatorStatement ::= (ExprAssignmentDesignatorStatement) DesignatorList Assignop Expr
+						|
+						(MethodCallDesignatorStatement) DesignatorList FuncCallStart ActParsList FuncCallEnd
+						|
+						(IncrementDesignatorStatement) DesignatorList INC
+						|
+						(DecrementDesignatorStatement) DesignatorList DEC
+						|
+						(SetAssignmentDesignatorStatement) DesignatorList Assignop DesignatorList Setop DesignatorList
+						|
+						(ErrorDesignatorStatement) DesignatorList error
+						|
+						(DualIncrementDesignatorStatement) DesignatorList DUAL_INC
+						;
+/* EXPRESSION */
+
+ExprOrNone ::= (ExpressionExists) Expr 
+			   | 
+			   (NoExpression) /* epsilon */ 
+			   ;
+Expr ::= (Expression) Term ExprNext
+		 |
+		 (NegativeExpression) MINUS Term ExprNext
+		 |
+		 (MapExpression) DesignatorList MAP DesignatorList
+		 ;
+ExprNext ::= (NextTermExpression) Addop Term ExprNext
+			 |
+			 (NoNextTermExpression)/* epsilon */
+			 ;
+
+Term ::= (Term) Factor TermNext;
+TermNext ::= (NextFactorExpression) Mulop Factor TermNext
+			 |
+			 (NoNextFactorExpression) /* epsilon */
+			 ;
+		 
+ActParsList ::= (ActualParametersList) ActPars 
+				| 
+				(NoActualParametersList) /* epsilon */ 
+				;
+BracedActParsList ::= (BracedActualParametersList) FuncCallStart ActParsList FuncCallEnd
+					  |
+					  (NoBracedActualParametersList)/* epsilon */
+					  ;
+FuncCallStart ::= (FuncCallStart) L_BRACKET_CURVED;
+FuncCallEnd ::= (FuncCallEnd) R_BRACKET_CURVED;
+
+ActPars ::= (ActualParameter) ActParsNext ActParam:value;
+ActParsNext ::= (NextActualParameter) ActParsNext ActParam:value COMMA 
+				|
+				(NoNextActualParameter) /* epsilon */
+				;
+				
+ActParam ::= (ActParam) Expr:value;
+
+Factor ::= (DesignatorFactor) DesignatorList BracedActParsList
+		  |(MaxArrayElementDesignatorFactor) HASH DesignatorList
+		  |(NumberFactor) NUMBER:value 
+		  |(CharacterFactor) CHAR:value
+		  |(BooleanFactor) BOOL:value 
+		  |(AllocateArrayFactor) NEW Type L_BRACKET_SQUARED Expr R_BRACKET_SQUARED
+		  |(AllocateVariableFactor) NEW Type L_BRACKET_CURVED ActParsList R_BRACKET_CURVED
+		  |(BracketedExpressionFactor) L_BRACKET_CURVED Expr R_BRACKET_CURVED
+		  ;
+Setop ::= (Union) UNION | (Intersect) INTERSECT;
+Mulop ::= (Multiplication) MULTIPLY | (Division) DIVIDE | (Remainder) PERCENT;
+Addop ::= (Addition) PLUS | (Subtraction) MINUS;
+Relop ::= (IsEqual) IS_E | (IsNotEqual) IS_NE 
+		| (IsGreaterThan) IS_GT | (IsGreaterThanOrEqual) IS_GTE 
+		| (IsLessThan) IS_LT | (IsLessThanOrEqual) IS_LTE
+		;
+Assignop ::= (AssignmentOperator) EQUAL;
+Label ::= (Label) IDENT;
+DesignatorList ::= (DesignatorList) DesignatorIdentifier DesignatorNext;
+
+DesignatorIdentifier ::= (DesignatorIdentifier) IDENT:objectName;
+MemberIdentifier ::= (MemberIdentifier) IDENT:fieldName;
+ArrayIdentifier ::= (ArrayIdentifier) L_BRACKET_SQUARED Expr R_BRACKET_SQUARED;
+
+
+DesignatorNext ::= (ClassFieldAccess) DOT MemberIdentifier DesignatorNext
+				   |
+				   (ArrayElementAccess) ArrayIdentifier DesignatorNext
+				   |
+				   (DesignatorListEnd)/* epsilon */
+				   ;
+/* CONDITIONS */
+
+Condition ::= (ConditionTermsList)CondTerm OrConditionList
+			  |
+			  (ErrorConditionTermList) error
+			  ;
+OrConditionList ::= (OrConditions)LOGICAL_OR CondTerm OrConditionList
+					|
+					(NoOrConditions) /* epsilon */
+					;
+CondTerm ::= (ConditionTerm) CondTermStart CondFact AndConditionList;
+
+CondTermStart ::= (CondTermStart) /* epsilon */;
+AndConditionList ::= (AndConditions) LOGICAL_AND CondFact AndConditionList
+					 |
+					 (NoAndConditions) /* epsilon */
+					 ;
+CondFact ::= (ConditionFactor) Expr RelExprOrNone;
+RelExprOrNone ::= (ComparisonExpression) Relop Expr 
+				  |
+				  (NoComparisonExpression) /* epsilon */
+				  ;
+

@@ -1,0 +1,5 @@
+program MJProgram
+const bool k = true, t = 5, d = 'c', n = 258 ;
+{
+
+}

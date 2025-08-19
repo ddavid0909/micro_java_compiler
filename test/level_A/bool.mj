@@ -1,0 +1,23 @@
+program boolProg
+	bool a, b;
+	const bool c = true;
+	bool arr_a[], arr_b[];
+
+{
+	void main() 
+		int zz[], zzz, zzzz[];
+		bool z5[];
+	{
+		a = c;
+		arr_a = new bool[20];
+		print(arr_a[0]);
+		print(arr_a[1]);
+		arr_a[19] = true;
+		print(arr_a[19]);
+		arr_a[1] = false;
+		a = b;
+		print(a);
+		print(arr_a[1]);
+	}
+	
+}

@@ -1,0 +1,17 @@
+program max_mj
+int k;
+{
+	void main() int a[]; char b[]; bool c[]; {
+		a = new int[20];
+		k = 0;
+		do {
+			a[k] = k + 5;
+			print(a[k]);
+			k++;
+		} while (k < 20);
+		a[5] = 200;
+		print(eol);
+		k = #a;
+		print(#a);
+	}
+}

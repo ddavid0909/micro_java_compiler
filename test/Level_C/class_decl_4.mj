@@ -1,0 +1,118 @@
+program class_4_decl
+// Testira da li radi sa klasama koje pri izvodjenju ne dobijaju nova polja
+// Testira assignability i compatibility za prosljedjivanje vrijednosti funkciji, za povratnu vrijednost, i za poredjenje.
+class Class_1 {
+	int a;
+	int b;
+	int c;
+	{
+		int meth_1() {
+			return 1;
+		}
+ 	}
+}
+
+class Class_2 extends Class_1 {
+	{
+		int meth_1() {
+			return 2;
+		}
+		
+	}
+}
+class Class_3 extends Class_2 {
+	{
+		int meth_1() {
+			return 3;
+		}
+	}
+}
+interface Interface_4 {
+	int height() {
+		return 4;
+	}
+}
+class Class_4 extends Interface_4{
+	{}
+}
+{
+void f(Class_1 c) {
+	print('f');
+	print(c.a);
+}
+void f_1() {
+	return;
+}
+Class_1 returns_class(int num) Class_1 c_1; Class_2 c_2; Class_3 c_3; Class_4 c_4;{
+	return c_1;
+	return c_2;
+	return c_3;
+	//return c_4; // semanticka greska za povratnu vrijednost.
+}
+void main() Class_1 c_1; Class_2 c_2; Class_3 c_3; Class_4 c_4; Class_1 arr[]; Class_2 arr_2[], arr_3[], arr_4[]; Interface_4 inter; {
+	c_1 = new Class_1();
+	c_1 = new Class_2();
+	c_4 = null;
+	arr = null;
+	//c_1.a = null;
+	c_1.a = 5;
+	print(c_1.a);
+	c_2 = new Class_2();
+	c_2.a = 10;
+	c_2.c = 7;
+	print(c_2.c);
+	print(c_1.meth_1());
+	c_1 = new Class_3();
+	c_1.a = 3;
+	print(c_1.meth_1());
+	arr = new Class_3[20];
+	print(len(arr));
+	print(c_1.a);
+	print('F');
+	f(c_1);
+	f(c_2);
+	//f(c_4); // semanticka greska za tip formalnog parametra
+	
+	// Provjere za kompatibilnost
+	print(eol);
+	print('K',1);print('O',1);print('M',1);print('P',1);
+	print(eol);
+	
+	c_1 = null;
+	if (c_1 == null) print(0); // 0
+	else print(-1);
+	c_1 = new Class_1();
+	c_2 = new Class_2();
+	if (c_1 == c_2) print(-1);
+	else print(0);//0
+	c_1 = c_2;
+	if (c_1 == c_2) print(0);//0
+	else print(-1);
+	if (c_2 == c_1) print(0);//0
+	else print(-1);
+	
+	inter = new Class_4();
+	c_4 = new Class_4();
+	if (c_4 == inter) print(-1);
+	else print(0);
+	
+	inter = c_4;
+	if (c_4 == inter) print(0);
+	else print(-1);
+	
+	if (arr == arr_2) print(0);
+	else print(-1); // -1
+	
+	arr_2 = new Class_3[20];
+	arr = arr_2;
+	
+	if (arr == arr_2) print(0); // 0
+	else print(-1);
+	
+	 // 5    7    2    3   20    3    F    f    3    f   10    
+     // KOMP    
+     // 0    0    0    0    0    0   -1    0
+     
+     if (arr_3 == arr_4) print(10); // 10
+}
+}

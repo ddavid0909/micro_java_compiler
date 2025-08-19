@@ -1,0 +1,33 @@
+program class_5_decl
+// Testira deklaracije metoda i kako se mogu izmijeniti.
+class Class_1 {
+	int a;
+	int b;
+	int c;
+	{
+		int meth_1() {
+			return 1;
+		}
+		Class_1 meth() {
+			return null;
+		}
+ 	}
+}
+
+class Class_2 extends Class_1 {
+	{
+		int meth_1() {
+			return 2;
+		}
+		Class_2 meth() int a;{
+			return null;
+		}
+		
+	}
+}
+
+{
+void main(){
+	
+}
+}

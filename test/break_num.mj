@@ -1,0 +1,29 @@
+program break_num
+int a;
+{
+	void main() {
+		a = 5;
+		do {
+			do {
+				do {
+					print(a);
+					a--;
+					if (a % 2 == 1)
+						break#2;
+					else
+						break#1;
+					} while ();	
+				print('O',1); 
+				print('N',1); 
+				print('E',1);
+			} while ();
+			print(' ',1);
+			print('T',1); 
+			print('W',1); 
+			print('O',1);
+			print(eol);
+			print(a);
+			a--;
+		} while (a > 0);
+	}
+}

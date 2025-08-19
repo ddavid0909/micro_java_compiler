@@ -1,0 +1,5 @@
+program MJProgram
+const int k = 1, t = 5;
+{
+
+}

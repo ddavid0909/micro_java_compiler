@@ -1,0 +1,30 @@
+# Eclipse project files
+.classpath
+.project
+.settings/
+
+# Build directories (Ant)
+build/
+dist/
+
+# Compiled class files
+*.class
+
+# Logs and temp
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Mac OS
+.DS_Store
+.idea/
+
+# Ignore all .obj files inside test/ at any depth
+test/**/*.obj
+
+# Ignore logs
+logs/
+
+# Ignore bin
+bin/

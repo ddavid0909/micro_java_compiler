@@ -1,0 +1,62 @@
+program MJProgram
+	int arr[];
+	class A {
+		int a;
+		char a_c;
+		bool a_b;
+		int a_arr[];
+		{
+			void a_meth_1() {
+				print('A');
+			}
+			
+			void set_a(int t) {
+				if (t < 0) {
+					print(0);
+				} else {
+					this.a = t;
+					print(a);
+				}
+			}
+			
+			void set_a_b(int k) {
+			 	if (k % 2 == 0) {
+			 		a_b = true;
+			 	} else {
+			 		a_b = false;
+			 	}
+			 	
+			}
+		}
+	}
+	
+	class B extends A {
+		int b;
+		{
+			void a_meth_1() {
+				print('B');
+			}
+		}
+	}
+{
+	void main() A a; {
+		a = new A();
+		a.a_arr = new int[20];
+		arr = a.a_arr;
+		arr[19] = 5;
+		arr[7] = 19;
+		arr[3] = 7;
+		arr[1] = 3;
+		print(arr[arr[arr[arr[1]]]]); // 5
+		print(a.a_arr[1]); // 3
+		a.set_a(-1); // 0
+		a.set_a(9); // 9
+		a.set_a_b(1);
+		print(a.a_b); // false
+		a.set_a_b(6); 
+		print(a.a_b); // true
+		a.a_meth_1(); // A
+		a = new B();
+		a.a_meth_1(); // B
+	}
+}

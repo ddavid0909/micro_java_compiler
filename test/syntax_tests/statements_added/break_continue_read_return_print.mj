@@ -1,0 +1,111 @@
+program MJProgram
+	bool my_var[];
+	int x;
+	interface D {}
+	class B {
+		bool my_var[];
+		int x;
+		bool y;
+		char c;
+		char t[];
+	}
+	bool y;
+	char c;
+	char t[];
+	class A extends B {
+		bool my_var[];
+		int x;
+		bool y;
+		char c;
+		char t[];
+		{
+		int int_meth()
+			int k, m[];
+			int t;
+			{
+				continue;
+				{
+					niz = new int[3];
+					niz[nula] = dva;
+					niz[jedan] = 3;
+					niz[niz[nula]] = niz[niz[1]] * 4;
+					bodovi = niz[2]/niz[0];
+					break;
+					nizch = new char[3];
+					nizch[0] = 'a';
+					nizch[jedan] = 'b';
+					nizch[pet - 3] = 'c';
+				}
+			}
+		}
+	}
+	interface C {
+		void k();
+		int ml();
+		void t(int m, int g);
+		int l(char t, A k);
+		int int_meth()
+			int k, m[];
+			int t;
+			{
+				break;
+				{
+					s1 = new set[5]; s2 = new set[5]; s3 = new set[10];
+					bodovi = 0;
+					bodovi++;
+					bodovi = bodovi + jedan;
+					bodovi = bodovi * pet;
+					bodovi--;
+					break;
+					continue;
+					{
+						break;
+						break;
+						a=1;
+						read(bodovi);
+						bodovi = -bodovi + (pet * a / 2 - nula) * bodovi - (3 % 2 + 3 * 2 - 7);
+						niz[0] = 1; niz[1] = 2; niz[2] = 3;
+						addAll(s1, niz);
+						add(s2, 3); add(s2, 4); add(s2, 5);
+						s3 = s1 union s2;
+						{
+							continue;
+							read(a.b);
+							read(c.d.f.g);
+							print(bodovi); //6
+							print(eol);
+							print(niz[2]); //12
+							print(eol);
+							read(e);
+							read(h.j.k[5]);
+							read(l.m[4].n.o[7].p[t].r[q].s.t[r+3]);
+							{
+								addAll(s1, niz);
+								read(temp); add(s2, temp);
+								read(temp); add(s2, temp);
+								read(temp); add(s2, temp);
+								print(nizch[1]); //b
+								print(eol);
+								print(nizch[jedan * 2]); //c
+								print(eol);
+								print(ord(nizch[0])); //97
+								s3 = s1 union s2;
+								return l.m[4].n.o[7].p[t+7*(-8)];
+							}
+							return -5+2*3*4+(-2+3);
+							return;
+							return -8%(-x+t*y+7+8);
+							addAll(s1, niz);
+							read(temp); add(s2, temp);
+							read(temp); add(s2, temp);
+							read(temp); add(s2, temp);
+							s3 = s1 union s2;
+							print(s3); // 5 10 union {3 procitana broja}
+						}
+					}
+				}
+			}
+		;
+		}
+{
+	}

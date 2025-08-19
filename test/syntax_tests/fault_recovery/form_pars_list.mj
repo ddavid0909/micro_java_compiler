@@ -1,0 +1,28 @@
+program MJProgram
+	int a, c;
+	
+{
+	void main(,) {
+		a = 3;
+		return;
+	}
+	
+	int k(a,) {
+		
+	}
+	
+	int t(a, int k) {
+		
+	}
+	
+	int q(, int r) {
+	
+	}
+	
+	int s(, r, int t) {
+		
+	}
+	int w(while z, if y, ,int t,) {
+	
+	}
+	}

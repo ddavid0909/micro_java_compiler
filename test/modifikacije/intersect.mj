@@ -1,0 +1,32 @@
+program intersect_mj
+set a, b, c, d;
+int arr[];
+{
+	void main() {
+		a = new set[15];
+		b = new set[7];
+		c = new set[8];
+		
+		add(b,1);
+		add(b,2);
+		add(b,3);
+		add(b,4);
+		add(b,5);
+		add(b,6);
+		
+		add(c,1);
+		add(c,3);
+		add(c,5);
+		add(c,7);
+		
+		a = b intersect c;
+		print(a);
+		print(eol);
+		
+		c = new set[1];
+		a = b intersect c;
+		print(a);
+		print(eol);
+		
+	}
+}

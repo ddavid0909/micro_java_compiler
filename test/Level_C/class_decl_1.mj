@@ -1,0 +1,114 @@
+program MJProgram
+	int global_a;
+	class Class_1 {
+		int a, b;
+		int c[];
+		char d[];
+		{
+			int m() {
+				return -1;
+			}
+			int class_1_meth(int t, int k) {
+				this.a = 5;
+				this.b = 0;
+				print(m());
+				b = 57;
+				print(b);
+				c = new int[5];
+				c[0] = 5;
+				print(t);
+				return 1;
+			}
+			void print_meth() {
+				print(1);
+			}
+			void base_meth() {
+				print(-1);
+			}
+		}
+	}
+	
+	class Class_2 extends Class_1 {
+		int r7;
+		int r8;
+		Class_1 arr[];
+		{
+			int class_1_meth(int t_2, int k_2) Class_1 t; {
+				this.a = 5;
+				this.r7 = 7;
+				r8 = 4;
+				print(this.r7);
+				print(k_2);
+				t = new Class_1();
+				return 0;
+			}
+			void print_meth() {
+				print(2);
+			}
+		}	
+	}
+	
+	class Class_3 extends Class_2 {
+		int class_3_var;
+		char class_3_var_2;
+		
+		{
+			void t() {}
+			void print_meth() {
+				print(3);
+			}
+		}
+		
+		
+	}
+	
+	
+	
+{
+	void t() {
+		print(199);
+	}
+	void main() Class_1 new_var; Class_2 class_arr; Class_3 last_class; { 
+		new_var = new Class_1();
+		new_var.d = new char[20];
+		new_var.a = 15;
+		print(new_var.a); // 15
+		new_var.a++;
+		print(new_var.a); // 16
+		new_var.a--;
+		print(new_var.a); // 15
+		new_var.d[5] = 'c';
+		print(new_var.d[5]); // c
+		new_var.c = new int[20];
+		new_var.c[0] = 5;
+		print(new_var.d[new_var.c[0]]); // c
+		class_arr = new Class_2();
+		class_arr.arr = new Class_1[10];
+		class_arr.arr[0] = new Class_1();
+		class_arr.arr[0].c = new int[20];
+		class_arr.arr[0].c[5] = 20;
+		print(class_arr.arr[0].c[new_var.c[0]]); // 20
+		class_arr.arr[0].c[new_var.c[0]]++;
+		print(class_arr.arr[0].c[new_var.c[0]]); // 21
+		class_arr.arr[0].c[new_var.c[0]]--;
+		print(class_arr.arr[0].c[new_var.c[0]]); // 20
+		t(); // 199
+		class_arr.arr[0].a = 10;
+		print(class_arr.arr[0].a); // 10
+		class_arr.arr[0].a++;
+		print(class_arr.arr[0].a); // 11
+		class_arr.arr[0].a--;
+		print(class_arr.arr[0].a); // 10
+		print(new_var.m());
+		new_var.class_1_meth(2, 0); // -1 57 2
+		class_arr.class_1_meth(2,1); // 7 1
+		print(new_var.a);
+		last_class = new Class_3();
+		new_var.print_meth();
+		new_var = new Class_2();
+		new_var.print_meth();
+		new_var = new Class_3();
+		new_var.print_meth();
+		new_var.base_meth();
+	}
+}

@@ -1,0 +1,75 @@
+program MJProgram
+	int a, c;
+	
+	class Sfera_1 extends 
+	{
+		int a,;
+		int ,b;
+		int c, , d;
+		int , , , q;
+		{
+			
+			 void postaviPoluprecnik(int r) {this.r = r; }
+				 
+			 int zapremina(k, int t)
+				int z;
+			{
+				z = cinilac;
+				return z *((r*r*r)/delilac);
+			}
+	
+		}
+	}
+	class Sfera_2 extends 5
+	{
+		int r;
+		{
+			
+			 void postaviPoluprecnik(int r) {this.r = r; }
+				 
+			 int zapremina(k, int t)
+				int z;
+			{
+				z = cinilac;
+				return z *((r*r*r)/delilac);
+			}
+	
+		}
+	}
+	class Sfera_3 extends while true do 5 char x
+	{
+		int r;
+		{
+			
+			 void postaviPoluprecnik(int r) {this.r = r; }
+				 
+			 int zapremina(k, int t)
+				int z;
+			{
+				z = cinilac;
+				return z *((r*r*r)/delilac);
+			}
+	
+		}
+	}
+	class Sfera_4 extends if (x==5) {
+		a = 7;
+	}
+	{
+		int r;
+		{
+			
+			 void postaviPoluprecnik(int r) {this.r = r; }
+				 
+			 int zapremina(k, int t)
+				int z;
+			{
+				z = cinilac;
+				return z *((r*r*r)/delilac);
+			}
+	
+		}
+	}
+	
+{
+	}

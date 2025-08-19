@@ -1,0 +1,20 @@
+program arr_access_count
+int arr[];
+char arr_c[];
+bool arr_b[];
+set s;
+{
+	void main() {
+		arr = new int[30];
+		print(len(arr)); // 30
+		arr[2] = 3;
+		arr[arr[0]] = 1;
+		print(#arr[0]); // 2
+		print(#arr[1]); // 0
+		arr[0] = 2; 
+		print(#arr[arr[0]]); // 1
+		print(#arr[0]); // 4
+		print(#arr); // 3
+		arr[31] = 12; // TRAP
+	}
+}

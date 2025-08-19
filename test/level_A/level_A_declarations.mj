@@ -1,0 +1,50 @@
+program MJProgram
+	int a, b;
+	int b;
+	const int c = 5, d = 6;
+	const char f = 't', g = 'a';
+	int aa[], bb, cc[], dd[], ee;
+	const bool h = true, i = false;
+	// ispod su neispravni izrazi
+	const bool j = 4, k = '5', l = true;
+	char ff[], gg, hh[];
+	bool r, s, t;
+	const int m = 4, n = 7;
+	char o, p, q;
+	set set_a, set_b, set_c;
+
+{
+	int main(bool main_a[], char main_c[], int main_b
+	) 
+		int zz[], zzz, zzzz[];
+		bool z5[];
+	{
+		x = y + 5 + 3;
+		print(1);
+		print(2);
+		
+		k();
+	}
+	
+	char k_func(bool k_a[], char k_c, bool k_b, int k_arr[]
+	)
+		int k_zz;
+		bool k_z_k[];
+	{
+		k_zz = k_arr[5+6];
+		read(k_zz);
+		read(k_z_k[1]);
+		read(k_z_k); // Greska jer read moze da uzme samo promjenlijvu, a ne i niz
+		read(null); // ovo takodje nije dobro jer niej odgovorajuceg tipa.
+		read(set_a);
+		print(5);
+		print(k_a);
+		print(k_a[1]);
+		print(k_c);
+		print(set_a);
+		set_a = set_b union set_c;
+		h = set_b union set_c;
+		print(set_a, 1);
+		return 5;
+	}
+}

@@ -1,0 +1,22 @@
+program MJProgram
+	bool my_var[];
+	int x;
+	class B {
+		bool my_var[];
+		int x;
+		bool y;
+		char c;
+		char t[];
+	}
+	bool y;
+	char c;
+	char t[];
+	class A extends B {
+		bool my_var[];
+		int x;
+		bool y;
+		char c;
+		char t[];
+	}
+{
+	}

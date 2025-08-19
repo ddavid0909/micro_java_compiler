@@ -1,0 +1,154 @@
+program MJProgram
+	int a, b;
+	int b;
+	const int c = 5, d = 6;
+	const char f = 't', g = 'a';
+	int aa[], bb, cc[], dd[], ee;
+	const bool h = true, i = false;
+	// ispod su neispravni izrazi
+	const bool j = 4, k = '5', l = true;
+	char ff[], gg, hh[];
+	bool r, s, t;
+	const int m = 4, n = 7;
+	char o, x, y;
+	
+	class Class_1 {
+		int a, b;
+		int c[];
+		int d[], e, f[];
+		{
+		}
+	}
+	
+	class Class_2 extends Class_1 {
+		int r7;
+		{
+			int class_2_first_meth()
+			{
+				return 1;
+			}
+			int class_2_func(char k, int q, int func_int_arr[])
+				int not_parameter;
+			 {
+				return 1;
+			}
+			void class_2_proc(char k, int q, int proc_int_arr[]) 
+				int not_parameter_1;
+				int not_parameter_2[];
+				char not_parameter_3[];
+			{
+				return;
+			}
+		}
+	}
+	
+	class Class_3 extends Class_2 {
+		int r8;
+		int r9[];
+		char r10[];
+		bool r11[];
+		Class_2 arr[];
+		{
+		int class_3_new_meth(int t, int p, char q)
+			char class_3_char;
+			bool class_3_bool;
+			{
+				return 3;
+			}
+		void class_3_another_meth()
+			char class_3_char;
+			bool class_3_bool;
+			{
+				return;
+			}	
+		int class_2_func(char a, int b, int der_arr[])
+			int class_3_added_param;
+			{
+				return 2;
+			}
+		int class_2_proc()
+		{
+			return 1;
+		}
+		}
+	}
+	
+	class Class_4 extends int {
+		
+	}
+	
+	class Class_5 {
+		int r_5;
+		int r_8[];
+		Class_2 class_field[];
+		Class_3 class_field_1[];
+		Class_3 class_field_2;
+		{
+			char class_5_meth_1(char class_5_a, char class_5_arr[]) 
+				char class_5_not_parameter;
+			{
+				this.class_field_1[1].arr[2].f[0]++;
+				this.class_field_2.r9[4]--;
+				this.r_8[2]++;
+				this.r_5++;
+				// Greska, pretposlednji clan nije int
+				this.r_5 = 9*8+7*9*this.class_field_1[3].r10[4]-9*65*m;
+				// Treba ispravno da radi, sve su cijeli brojevi, ispravan iskaz dodjele.
+				this.r_5 = -7*9*this.r_5*this.class_field_1[1].arr[1].f[5]*23*m+7*9-9*3;
+				// Pokusaj promjene konstante
+				m++;
+				// Ispravan iskaz dodjele sa ref tipovima
+				this.class_field = null;
+				this.class_field[2] = null;
+				// Greske : 1. konstanta, 2, 3 i 4 nedodjeljivi tipovi
+				m = 7;
+				r_5 = null;
+				r_5 = 'c';
+				this.class_field = 5;
+				// ispravni izrazi za nizove
+				this.class_field = new Class_2[5];
+				this.r_8 = new int[7];
+				this.r_8[2] = 6;
+				// neispravna indeksiranja
+				this.r_8['c'] = 7;
+				this.r_8 = new int[true];
+				class_field[2] = new Class_2();
+				class_field[2] = new int();
+				return 'c';
+			}
+			void class_5_meth_2(char class_5_a) {
+				return;
+			}
+		}
+	}
+	
+{
+	int new_no_parameter_function()
+	{
+		return 5;
+	}
+	int main(bool main_a[], char main_c[], int main_b
+	) 
+		int a[], b, c[];
+		bool d[];
+	{
+		x = y + 5 + 3;
+		d[2] = true;
+		print(1);
+		print(2);
+		// ispravan poziv funkcije bez parametara
+		new_no_parameter_function();
+		// ovo uopste nije funkcija
+		k();
+	}
+	
+	char k_func(bool k_a[], char k_c, bool k_b, char k_arr[]
+	)
+		int k_zz;
+		bool k_z_k[];
+	{
+		// greska. funkcija ima vise parametara.
+		main(k_b, k_arr, 5);
+		return 5;
+	}
+}

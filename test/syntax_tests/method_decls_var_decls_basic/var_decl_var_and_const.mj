@@ -1,0 +1,10 @@
+program MJProgram
+	bool my_var[], y;
+	int x, p;
+	const int const_m = 5, const_n = 6;
+	char c;
+	char t[], parr[];
+	const char cchar = 'v', ccchar = 'c';
+	
+{
+	}

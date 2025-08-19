@@ -1,0 +1,15 @@
+program MJProgram
+	int a, ,b;
+	int c, , ,d[] , ;
+	int e, f, , , ;
+	int g, h, i, j;
+	int k, 123, l, m, true, n;
+	char o, 'v', while, do, p, if, else, q;
+	int r[], s[], t, u, false, {;
+	bool dd, while do if else ;
+	int v, err[false], w[]; // samo ignorise err[false]
+	int , x, y, z; // ignorise int i losu smjenu
+	int err[false], aa, bb, cc;
+	
+{
+	}

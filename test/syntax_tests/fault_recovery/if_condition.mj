@@ -1,0 +1,25 @@
+program MJProgram
+	int a, b;
+	
+{
+	void main() {
+		if (c = 3) {
+			d = 4;
+			return 4;
+		}
+		if (c==3 || d==4 while true) {
+			e = 7;
+			return 5;
+		}
+		if (d >= 5 || true == 1) {
+			print(5);
+		}
+		if (c==3 and d==4) {
+			return 6;
+		}
+		do{
+			if(i == 2) ibool = true;
+		} while( i < 5, {);
+	}
+	
+	}
