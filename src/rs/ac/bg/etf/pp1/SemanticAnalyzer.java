@@ -10,7 +10,7 @@ import rs.etf.pp1.symboltable.*;
 import rs.etf.pp1.symboltable.concepts.*;
 import rs.etf.pp1.symboltable.structure.*;
 
-public class SemanticPass_A extends VisitorAdaptor {
+public class SemanticAnalyzer extends VisitorAdaptor {
 	Obj currentMethod = null;
 	Obj currentClass = null;
 	Obj currentInterface = null;
@@ -1191,7 +1191,7 @@ public class SemanticPass_A extends VisitorAdaptor {
 	public void visit(ConditionFactor node) {
 		Obj leftOperand = node.getExpr().obj;
 		if (node.getRelExprOrNone() instanceof NoComparisonExpression) {
-			if (leftOperand.getType() != SemanticPass_A.boolType) {
+			if (leftOperand.getType() != SemanticAnalyzer.boolType) {
 				report_error("Semanticka greska. Uslovni izraz mora da bude tipa boolean!", node);
 			}
 		} else {

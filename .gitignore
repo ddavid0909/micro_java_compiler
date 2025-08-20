@@ -15,6 +15,7 @@ dist/
 *.tmp
 *.bak
 *.swp
+*.iml
 
 # Mac OS
 .DS_Store

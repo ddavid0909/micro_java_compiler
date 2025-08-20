@@ -30,13 +30,13 @@ public class CodeGenerator extends VisitorAdaptor {
 	
 	public void visit(PrintStatementNoNumber node) {
 		Struct node_type = node.getExpr().obj.getType();
-		if (node_type == Tab.intType || node_type == SemanticPass_A.boolType) {
+		if (node_type == Tab.intType || node_type == SemanticAnalyzer.boolType) {
 			Code.loadConst(5);
 			Code.put(Code.print);
 		} else if (node_type == Tab.charType) {
 			Code.loadConst(5);
 			Code.put(Code.bprint);
-		} else if (node_type == SemanticPass_A.setType) {
+		} else if (node_type == SemanticAnalyzer.setType) {
 			Obj print_node = Tab.currentScope.findSymbol("print");
 			int offset = print_node.getAdr() - Code.pc;
 			Code.put(Code.call);
@@ -49,11 +49,11 @@ public class CodeGenerator extends VisitorAdaptor {
 		int width = node.getNumber();
 		Code.loadConst(width);
 		Struct node_type = node.getExpr().obj.getType();
-		if (node_type == Tab.intType || node_type == SemanticPass_A.boolType) {
+		if (node_type == Tab.intType || node_type == SemanticAnalyzer.boolType) {
 			Code.put(Code.print);
 		} else if (node_type == Tab.charType) {
 			Code.put(Code.bprint);
-		} else if (node_type == SemanticPass_A.setType) {
+		} else if (node_type == SemanticAnalyzer.setType) {
 			// ne obradjuje se ovaj load.
 			Code.put(Code.pop);
 			Obj print_node = Tab.currentScope.findSymbol("print");
@@ -759,7 +759,7 @@ public class CodeGenerator extends VisitorAdaptor {
 			Code.put(Code.mul);
 		}
 		
-		if (node.obj.getType() == SemanticPass_A.setType) {
+		if (node.obj.getType() == SemanticAnalyzer.setType) {
 			Code.loadConst(1);
 			Code.put(Code.add);
 		}

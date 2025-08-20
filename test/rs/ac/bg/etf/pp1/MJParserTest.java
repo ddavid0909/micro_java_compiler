@@ -41,15 +41,14 @@ public class MJParserTest {
 			Yylex lexer = new Yylex(br);
 			
 			MJParser parser = new MJParser(lexer);
-	        Symbol s = parser.parse();  //pocetak parsiranja
+	        Symbol s = parser.parse();
 	        
 	        Program prog = (Program)(s.value); 
 	        Tab.init();
-			// ispis sintaksnog stabla
 			log.info(prog.toString(""));
 			log.info("===================================");
 			MJParserTest.addToUniverse();
-			SemanticPass_A semanticPass = new SemanticPass_A();
+			SemanticAnalyzer semanticPass = new SemanticAnalyzer();
 			prog.traverseBottomUp(semanticPass);
 			log.info("===================================");
 			Tab.dump(new BooleanDumpSymbolTableVisitor());
@@ -64,9 +63,9 @@ public class MJParserTest {
 				Code.write(new FileOutputStream(objFile));
 			} else {
 				if (parser.errorDetected)
-					System.out.println("Pronadjene sintaksne greske pri prevodjenju!");
+					System.out.println("Syntax errors found during parsing!");
 				if (semanticPass.errorDetected)
-					System.out.println("Pronadjene semanticke greske pri prevodjenju!");
+					System.out.println("Semantic errors found during analysis!");
 			}
 			
 		} 
@@ -78,13 +77,12 @@ public class MJParserTest {
 	
 	private static void addToUniverse() {
 		
-		Tab.insert(Obj.Type, "bool", SemanticPass_A.boolType);
-		Tab.insert(Obj.Type, "set", SemanticPass_A.setType);
-		
-		// add operation
+		Tab.insert(Obj.Type, "bool", SemanticAnalyzer.boolType);
+		Tab.insert(Obj.Type, "set", SemanticAnalyzer.setType);
+
 		Obj add = Tab.insert(Obj.Meth, "add", Tab.noType);
 		add.setLevel(2);
-		Obj set = new Obj(Obj.Var, "dest", SemanticPass_A.setType);
+		Obj set = new Obj(Obj.Var, "dest", SemanticAnalyzer.setType);
 		set.setLevel(1);
 		set.setAdr(0);
 		Obj new_number = new Obj(Obj.Var, "number", Tab.intType);
@@ -97,7 +95,7 @@ public class MJParserTest {
 		
 		Obj remove = Tab.insert(Obj.Meth, "remove", Tab.noType);
 		remove.setLevel(2);
-		set = new Obj(Obj.Var, "dest", SemanticPass_A.setType);
+		set = new Obj(Obj.Var, "dest", SemanticAnalyzer.setType);
 		set.setLevel(1);
 		set.setAdr(0);
 		new_number = new Obj(Obj.Var, "number", Tab.intType);
@@ -107,22 +105,19 @@ public class MJParserTest {
 		remove_parameters.insertKey(set);
 		remove_parameters.insertKey(new_number);
 		remove.setLocals(remove_parameters);
-		
-		// print set operation
+
 		Obj print_set = Tab.insert(Obj.Meth, "print", Tab.noType);
 		print_set.setLevel(1);
-		set = new Obj(Obj.Var, "dest", SemanticPass_A.setType);
+		set = new Obj(Obj.Var, "dest", SemanticAnalyzer.setType);
 		set.setAdr(0);
 		set.setLevel(1);
 		SymbolDataStructure print_parameters = SymbolTableFactory.instance().createSymbolTableDataStructure();
 		print_parameters.insertKey(set);
 		print_set.setLocals(print_parameters);
-		
-		
-		// add all operation
+
 		Obj addAll = Tab.insert(Obj.Meth, "addAll", Tab.noType);
 		addAll.setLevel(2);
-		set = new Obj(Obj.Var, "dest", SemanticPass_A.setType);
+		set = new Obj(Obj.Var, "dest", SemanticAnalyzer.setType);
 		set.setAdr(0);
 		set.setLevel(1);
 		Obj add_array = new Obj(Obj.Var, "new_array",  new Struct(Struct.Array, Tab.intType));
@@ -135,13 +130,13 @@ public class MJParserTest {
 		
 		Obj union = Tab.insert(Obj.Meth, "union", Tab.noType);
 		union.setLevel(3);
-		Obj dest = new Obj(Obj.Var, "dest", SemanticPass_A.setType);
+		Obj dest = new Obj(Obj.Var, "dest", SemanticAnalyzer.setType);
 		dest.setAdr(0);
 		dest.setLevel(1);
-		Obj left = new Obj(Obj.Var, "left", SemanticPass_A.setType);
+		Obj left = new Obj(Obj.Var, "left", SemanticAnalyzer.setType);
 		left.setAdr(1);
 		left.setLevel(1);
-		Obj right = new Obj(Obj.Var, "right", SemanticPass_A.setType);
+		Obj right = new Obj(Obj.Var, "right", SemanticAnalyzer.setType);
 		right.setAdr(2);
 		right.setLevel(1);
 		SymbolDataStructure union_parameters = SymbolTableFactory.instance().createSymbolTableDataStructure();
@@ -152,13 +147,13 @@ public class MJParserTest {
 		
 		Obj intersect = Tab.insert(Obj.Meth, "intersect", Tab.noType);
 		intersect.setLevel(3);
-		dest = new Obj(Obj.Var, "dest", SemanticPass_A.setType);
+		dest = new Obj(Obj.Var, "dest", SemanticAnalyzer.setType);
 		dest.setAdr(0);
 		dest.setLevel(1);
-		left = new Obj(Obj.Var, "left", SemanticPass_A.setType);
+		left = new Obj(Obj.Var, "left", SemanticAnalyzer.setType);
 		left.setAdr(1);
 		left.setLevel(1);
-		right = new Obj(Obj.Var, "right", SemanticPass_A.setType);
+		right = new Obj(Obj.Var, "right", SemanticAnalyzer.setType);
 		right.setAdr(2);
 		right.setLevel(1);
 		SymbolDataStructure intersect_parameters = SymbolTableFactory.instance().createSymbolTableDataStructure();
