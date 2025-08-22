@@ -154,7 +154,7 @@ VarDeclList ::= (Constants) VarDeclList ConstDecl
 				(NoVariableDeclaration) /* epsilon */
 				;
 				
-/* CONSTANT DELCARATION */
+/* CONSTANT DECLARATION */
 ConstDecl ::= (ConstDeclaration) CONST CurConstType NextConstDecl IDENT:constName EQUAL OneConst:constVal SEMI
 			  ;
 			  
@@ -214,8 +214,6 @@ ClassMethods ::= (ClassMethodDeclaration) L_BRACKET_CURLY MethodDeclList R_BRACK
 				(NoClassMethodDeclaration) /* epsilon */
 				;
 
-
-
 /* INTERFACE DECLARATION */
 InterfaceDecl ::= (InterfaceDecl) INTERFACE InterfaceDeclStart L_BRACKET_CURLY InterfaceMethods R_BRACKET_CURLY;
 InterfaceDeclStart ::= (InterfaceDeclStart) IDENT:interfaceName;
@@ -230,7 +228,6 @@ InterfaceMethodDeclaration ::= (InterfaceMethodDeclaration) MethodDecl;
 InterfaceMethodSignature ::= (InterfaceMethodSignature) MethodSignature;
 
 /* METHOD DECLARATION LIST */
-
 MethodDecl ::= (MethodDeclaration) MethodSignature MethodParamsList L_BRACKET_CURLY StatementList R_BRACKET_CURLY;
 
 MethodParamsList ::= (MethodParametersList) MethodParamsList VarDecl
@@ -264,7 +261,6 @@ FormPars ::= (FormalParameter) FormPars FormParsType IDENT:formParName ArrayVar:
 			 ;
 
 /* STATEMENT */
-
 StatementList ::= (StatementListExists) Statement StatementList
 				  |
 				  (NoStatementList) /* epsilon */
@@ -320,7 +316,6 @@ DesignatorStatement ::= (ExprAssignmentDesignatorStatement) DesignatorList Assig
 						(DualIncrementDesignatorStatement) DesignatorList DUAL_INC
 						;
 /* EXPRESSION */
-
 ExprOrNone ::= (ExpressionExists) Expr 
 			   | 
 			   (NoExpression) /* epsilon */ 
@@ -393,7 +388,6 @@ DesignatorNext ::= (ClassFieldAccess) DOT MemberIdentifier DesignatorNext
 				   (DesignatorListEnd)/* epsilon */
 				   ;
 /* CONDITIONS */
-
 Condition ::= (ConditionTermsList)CondTerm OrConditionList
 			  |
 			  (ErrorConditionTermList) error

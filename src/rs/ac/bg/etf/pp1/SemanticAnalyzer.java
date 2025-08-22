@@ -2,6 +2,7 @@ package rs.ac.bg.etf.pp1;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Objects;
 
 import org.apache.log4j.Logger;
 
@@ -18,88 +19,9 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	public static final Struct setType = new Struct(8);
 	Struct constType = null;
 	boolean errorDetected = false;
-	int nvars;
-	Logger log = Logger.getLogger(getClass());
-
-	private boolean checkNoNestedness(SyntaxNode node) {
-		if (this.currentMethod != null) {
-			report_error("Semanticka greska. Definicija interfejsa ili klase unutar funkcije", node);
-			return false;
-		}
-		if (this.currentClass != null) {
-			report_error("Semanticka greska. Definicija interfejsa ili klase unutar klase", node);
-			return false;
-		}
-		if (this.currentInterface != null) {
-			report_error("Semanticka greska. Definicija interfejsa ili klase unutar interfejsa", node);
-			return false;
-		}
-		return true;
-	}
-	
-	private boolean assignableTo(Struct src, Struct dest, SyntaxNode node) {
-		if (src == dest) return true;
-		if (dest.isRefType() && src == Tab.nullType) return true;
-		if (src.getKind() == Struct.Class && dest.getKind() == Struct.Class) {
-			while (src.getElemType() != null) {
-				if (src.getElemType() == dest) return true;
-				src = src.getElemType();
-			}
-			report_error("Semanticka greska. Dodjela klasama koje nisu u istoj hijerarhiji", node);
-			return false;
-		}
-		if (dest.getKind() == Struct.Interface && src.getKind() == Struct.Class) {
-			if (src.getImplementedInterfaces().contains(dest)) return true;
-			report_error("Semanticka greska. Dodjela referenci tipa interfejsa koja nije u implementirana", node);
-			return false;
-		}
-		if (dest.getKind() == Struct.Array && src.getKind() == Struct.Array) {
-			if (dest.getElemType() == Tab.noType) return true;
-			return this.assignableTo(src.getElemType(), dest.getElemType(), node);
-		}
-		report_error("Semanticka greska. Neadekvatan iskaz dodjele", node);
-		return false;
-	}
-	
-	private boolean compatibleWith(Struct s_1, Struct s_2, SyntaxNode node) {
-		// Ako je isti strukturni cvor, sve je u redu
-		// Ovo pokriva skoro sve slucajeve, osim nizova, uporedjivanja klasa u hijerarhiji i uporedijvanja klase i interfejsa u kom je.
-		if (s_1 == s_2) return true;
-		// Ako je referenca, moze jedna od vrijednosti da bude null.
-		if (s_2.isRefType() && s_1 == Tab.nullType || s_1.isRefType() && s_2 == Tab.nullType) return true;
-		// Ako su obje klase, moraju biti u istoj hijerarhiji
-		if (s_1.getKind() == Struct.Class && s_2.getKind() == Struct.Class) { 
-			Struct s_1_temp = s_1;
-			while (s_1_temp.getElemType() != null) {
-				if (s_1_temp.getElemType() == s_2) return true;
-				s_1_temp = s_1_temp.getElemType();
-			}
-			Struct s_2_temp = s_2;
-			while (s_2_temp.getElemType() != null) {
-				if (s_2_temp.getElemType() == s_1) return true;
-				s_2_temp = s_2_temp.getElemType();
-			}
-			report_error("Semanticka greska. Uporedjijvanje koje nisu u istoj hijerarhiji", node);
-			return false;
-		}
-		// Ako je jedna referenca interfejs a druga klasa
-		if (s_2.getKind() == Struct.Interface && s_1.getKind() == Struct.Class) {
-			if (s_1.getImplementedInterfaces().contains(s_2)) return true;
-			report_error("Semanticka greska. Klasa nekompatibilna sa interfejsom", node);
-			return false;
-		}
-		if (s_1.getKind() == Struct.Interface && s_2.getKind() == Struct.Class) {
-			if (s_2.getImplementedInterfaces().contains(s_1)) return true;
-			report_error("Semanticka greska. Klasa nekompatibilna sa interfejsom", node);
-			return false;
-		}
-		// Ako su nizovi obje, moraju da budu kompatibilni elementi
-		if (s_2.getKind() == Struct.Array && s_1.getKind() == Struct.Array) {
-			return this.compatibleWith(s_1.getElemType(), s_2.getElemType(), node);
-		}
-		report_error("Semanticka greska. Neadekvatan iskaz dodjele", node);
-		return false;
-	}
+	int n_vars;
+	private final Logger log = Logger.getLogger(this.getClass());
+	private final SemanticErrorDetector errorDetector = new SemanticErrorDetector();
 	
 	public void report_error(String message, SyntaxNode info) {
 		errorDetected = true;
@@ -127,11 +49,9 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	}
 
 	public void visit(Program program) {
+		program.obj = Tab.noObj;
 		Obj main_node = Tab.currentScope.findSymbol("main");
-		if (main_node == null) {
-			report_error("Semanticka greska. Ne postoji funkcija main u programu", program);
-		}
-		else {
+		if (this.errorDetector.mainPresent(program)) {
 			if (main_node.getType() != Tab.noType) {
 			report_error("Semanticka greska. Povratna vrijednost funkcije main razlicita od void", program);
 		}
@@ -139,7 +59,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 			report_error("Semanticka greska. Funkcija main je sa parametrima u programu", program);
 		}
 		}
-		nvars = Tab.currentScope.getnVars();
+		this.n_vars = Tab.currentScope.getnVars();
 		Tab.chainLocalSymbols(program.getProgName().obj);
 		Tab.closeScope();
 	}
@@ -148,131 +68,97 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 
 	// Postavlja tip konstante za cijeli red.
 	public void visit(CurConstType node) {
-		if (this.constType != null) {
-			report_error("Semanticka greska 0. Tip konstante je definisan dvaput", node);
-			return;
-		}
+		// TO-DO decide whether to change const type in case of nestedness or ignore the case since it shouldn't happen
+		this.errorDetector.nestedConstOrVariableDeclaration(this.constType, node);
 		this.constType = node.getType().struct;
 	}
 
 	// Postavlja brojnu vrijednost numericke konstante.
 	public void visit(NumberConstant node) {
-		if (this.constType == null || this.constType != Tab.intType) {
-			report_error("Semanticka greska 1. Konstante razlicitih tipova", node);
-		}
+		// There was check for this.constType == null, should be impossible based on syntax rules.
+		this.errorDetector.constTypesMatch(this.constType, Tab.intType, node);
 		node.struct = Tab.intType;
 	}
 
-	// Postavlja brojnu vrijednost znakovne konstante.
 	public void visit(CharacterConstant node) {
-		if (this.constType != null && this.constType != Tab.charType) {
-			report_error("Semanticka greska 2. Konstante razlicitih tipova", node);
-		}
+		this.errorDetector.constTypesMatch(this.constType, Tab.charType, node);
 		node.struct = Tab.charType;
 	}
 
-	// Postavlja brojnu vrijednost bulove konstante.
 	public void visit(BooleanConstant node) {
-		if (this.constType != null && this.constType != boolType) {
-			report_error("Semanticka greska 3. Konstante razlicitih tipova", node);
-		}
+		this.errorDetector.constTypesMatch(this.constType, SemanticAnalyzer.boolType, node);
 		node.struct = boolType;
 	}
 
-	// Omogucava veci broj uzastopnih konstanti u jednom redu.
 	public void visit(NextConstDeclaration node) {
-		if (node.getOneConst().struct != this.constType) {
-			report_error("Semanticka greska 4. Konstanta " + node.getConstName() + " nije odgovarajuceg tipa", node);
-		}
-		if (Tab.find(node.getConstName()) != Tab.noObj) {
-			report_error("Semanticka greska 5. Pokusaj ponovne deklaracije identifikatora " + node.getConstName(),
-					node);
+		// TO-DO is null check for constType missing? Syntax analysis would not allow CurConstType to be missing
+		this.errorDetector.constTypesMatch(node.getOneConst().struct, this.constType, node);
+		if (this.errorDetector.identifierRedeclaration(node.getConstName(), node)) {
 			return;
 		}
 		node.obj = Tab.insert(Obj.Con, node.getConstName(), node.getOneConst().struct);
-		String tip = "";
+		String type;
 		if (node.getOneConst().struct == Tab.intType) {
 			node.obj.setAdr(((NumberConstant) node.getOneConst()).getValue());
-			tip = "integer";
-		} else if (node.getOneConst().struct == Tab.charType) {
-			node.obj.setAdr(((CharacterConstant) node.getOneConst()).getValue());
-			tip = "char";
-		} else if (node.getOneConst().struct == boolType) {
-			node.obj.setAdr(((BooleanConstant) node.getOneConst()).getValue() ? 1 : 0);
-			tip = "boolean";
+			type = "integer";
 		}
-
-		report_info("Deklarisana konstanta " + node.getConstName() + " tipa " + tip, node);
+		else if (node.getOneConst().struct == Tab.charType) {
+			node.obj.setAdr(((CharacterConstant) node.getOneConst()).getValue());
+			type = "char";
+		}
+		else if (node.getOneConst().struct == boolType) {
+			node.obj.setAdr(((BooleanConstant) node.getOneConst()).getValue() ? 1 : 0);
+			type = "boolean";
+		}
+		else type = "";
+		report_info("Declared constant " + node.getConstName() + " of type " + type, node);
 	}
 
-	// Zavrsava se deklaracija konstanti u jednom redu.
-	// constType polje se resetuje.
 	public void visit(ConstDeclaration node) {
-		if (node.getOneConst().struct != this.constType) {
-			report_error("Semanticka greska 6. Konstanta " + node.getConstName() + " nije odgovarajuceg tipa", node);
-		}
-		if (Tab.find(node.getConstName()) != Tab.noObj) {
-			report_error("Semanticka greska 7. Pokusaj ponovne deklaracije identifikatora " + node.getConstName(),
-					node);
-			this.constType = null;
+		this.errorDetector.constTypesMatch(node.getOneConst().struct, this.constType, node);
+		// constant type variable must be reset after declaration line is completely processed.
+		this.constType = null;
+		if (this.errorDetector.identifierRedeclaration(node.getConstName(), node)) {
 			return;
 		}
 		node.obj = Tab.insert(Obj.Con, node.getConstName(), node.getCurConstType().getType().struct);
 
-		String tip = "";
+		String type = "";
 		if (node.getOneConst().struct == Tab.intType) {
 			node.obj.setAdr(((NumberConstant) node.getOneConst()).getValue());
-			tip = "integer";
+			type = "integer";
 		} else if (node.getOneConst().struct == Tab.charType) {
 			node.obj.setAdr(((CharacterConstant) node.getOneConst()).getValue());
-			tip = "char";
-		} else if (node.getOneConst().struct == boolType) {
+			type = "char";
+		} else if (node.getOneConst().struct == SemanticAnalyzer.boolType) {
 			node.obj.setAdr(((BooleanConstant) node.getOneConst()).getValue() ? 1 : 0);
-			tip = "boolean";
+			type = "boolean";
 		}
-
-		report_info("Deklarisana konstanta " + node.getConstName() + " tipa " + tip, node);
-		this.constType = null;
+		report_info("Declared constant " + node.getConstName() + " of type " + type, node);
 	}
 
 	// VARIABLE DECLARATION
 	// Postavlja tip promjenljive za cijeli red.
 	public void visit(CurVarType node) {
-		if (this.constType != null) {
-			report_error("Semanticka greska 8. Tip promjenljijve je definisan dvaput", node);
-			return;
-		}
-
+		this.errorDetector.nestedConstOrVariableDeclaration(this.constType, node);
 		this.constType = node.getType().struct;
 	}
 
-	// Ako nije nizovna promjenljiva, zadrzava vrijednost postavljenu u zadatom
-	// redu.
+	// if not array variable, keeps the data type of the variable declaration.
 	public void visit(IsNotArrayVar node) {
 		node.struct = this.constType;
 	}
 
-	// Mijenja tip na tip niza. STVARA NOVI STRUKTURNI CVOR, A NE DODAJE OBJEKTNI
+	// Changes the type of the array. Creates new struct node, does not create object node for array type.
 	public void visit(IsArrayVar node) {
+		// TO-DO decide whether this check is appropriate at all based on syntax rules.
 		if (this.constType == null) {
 			report_error("Semanticka greska 9. Tip niza nije definisan ", node);
 			return;
 		}
-		switch (this.constType.getKind()) {
-		case Struct.Bool:
-			node.struct = new Struct(Struct.Array, boolType);
-			return;
-		case Struct.Char:
-			node.struct = new Struct(Struct.Array, Tab.charType);
-			return;
-		case Struct.Int:
-			node.struct = new Struct(Struct.Array, Tab.intType);
-			return;
-		case Struct.Class:
+		if (this.errorDetector.isArrayable(this.constType, node)) {
 			node.struct = new Struct(Struct.Array, this.constType);
-			return;
-		default:
-			report_error("Neodgovarajuci tip niza", node);
+		} else {
 			node.struct = new Struct(Struct.Array, Tab.noType);
 		}
 	}
@@ -280,15 +166,12 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	// Provjerava da li je promjenljiva deklarisana u opsegu
 	// i ako nije dodaje je.
 	public void visit(NextVariableDeclaration node) {
-
-		if (Tab.currentScope.findSymbol(node.getVarName()) != null) {
-			report_error("Semanticka greska 10. Pokusaj ponovnog deklarisanja identifikatora " + node.getVarName(),
-					node);
+		if (this.errorDetector.identifierRedeclaration(node.getVarName(), node)) {
 			return;
 		}
 		int kind = this.currentClass != null && this.currentMethod == null ? Obj.Fld : Obj.Var;
 		node.obj = Tab.insert(kind, node.getVarName(), node.getArrayVar().struct);
-		report_info("Deklarisana promjenljiva " + node.getVarName(), node);
+		report_info("Declared variable " + node.getVarName(), node);
 		node.obj.setLevel(this.currentMethod == null ? 0 : 1);
 	}
 
@@ -296,35 +179,25 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	// i ako nije dodaje je
 	// oslobadja this.constType.
 	public void visit(VariableDeclaration node) {
-		if (Tab.currentScope.findSymbol(node.getVarName()) != null) {
-			report_error("Semanticka greska 11. Pokusaj ponovnog deklarisanja identifikatora " + node.getVarName(),
-					node);
-			this.constType = null;
+		this.constType = null;
+		if (this.errorDetector.identifierRedeclaration(node.getVarName(), node)) {
 			return;
 		}
 		int kind = this.currentClass != null && this.currentMethod == null ? Obj.Fld : Obj.Var;
 		node.obj = Tab.insert(kind, node.getVarName(), node.getArrayVar().struct);
-		report_info("Deklarisana promjenljiva " + node.getVarName(), node);
+		report_info("Declared variable " + node.getVarName(), node);
 		node.obj.setLevel(this.currentMethod == null ? 0 : 1);
 
-		this.constType = null;
 	}
 
-	// Trazi objektni cvor zadatog tipa
-	// Ako nema ovog cvora ili ako nije vrste Tip, izlazi greska
-	// Zadatom cvoru se postavlja tip.
 	public void visit(Type type) {
+		type.struct = Tab.noType;
+		// type node must exist
+		if (this.errorDetector.undeclaredIdentifier(type.getTypeName(), type)) return;
 		Obj typeNode = Tab.find(type.getTypeName());
-		if (typeNode == Tab.noObj) {
-			report_error("Semanticka greska 12. Nije pronadjen tip " + type.getTypeName() + " u tabeli simbola", type);
-			type.struct = Tab.noType;
-			return;
-		}
-		if (typeNode.getKind() != Obj.Type) {
-			report_error("Semanticka greska 13. Identifikator " + type.getTypeName() + " nije tip podatka.", type);
-			type.struct = Tab.noType;
-			return;
-		}
+		// type node must represent a type
+		if (this.errorDetector.badKind(typeNode.getKind(), Obj.Type, type.getTypeName(), type)) return;
+		// only then set struct node's value
 		type.struct = typeNode.getType();
 	}
 
@@ -335,14 +208,8 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	// Po potrebi dodaje this
 	public void visit(FunctionTypeName node) {
 		node.obj = Tab.noObj;
-		if (this.currentMethod != null) {
-			report_error("Semanticka greska 14. Deklaracija funkcije unutar funkcije", node);
-			return;
-		}
-		if (Tab.currentScope.findSymbol(node.getFunctionName()) != null) {
-			report_error("Semanticka greska 15. Identifikator " + node.getFunctionName() + " je vec deklarisan", node);
-			return;
-		}
+		if (this.errorDetector.isNested(node, this.currentMethod, null, null)) return;
+		if (this.errorDetector.identifierRedeclaration(node.getFunctionName(), node)) return;
 		this.currentMethod = Tab.insert(Obj.Meth, node.getFunctionName(), node.getType().struct);
 		this.currentMethod.setFpPos(this.currentClass == null ? 0 : 1);
 		node.obj = this.currentMethod;
@@ -353,10 +220,10 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 		if (this.currentClass != null) {
 			Tab.insert(Obj.Var, "this", this.currentClass.getType());
 			// this.currentMethod.setLevel(this.currentMethod.getLevel()+1);
-			report_info("Prepoznat metod  " + this.currentMethod.getName() + " klase " + this.currentClass.getName(),
-					node);
+			report_info("Recognized method  " + this.currentMethod.getName() +
+							" of class " + this.currentClass.getName(), node);
 		}
-		report_info("Obradjuje se funkcija " + node.getFunctionName(), node);
+		report_info("Processing function " + node.getFunctionName(), node);
 	}
 
 	// Provjerava da ime procedure nije zauzeto i da nema ugnjezdjavanja procedura
@@ -364,26 +231,18 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	// Po potrebi dodaje this
 	public void visit(ProcedureTypeName node) {
 		node.obj = Tab.noObj;
-		if (this.currentMethod != null) {
-			report_error("Semanticka greska 16. Deklaracija procedure unutar procedure", node);
-			return;
-		}
-		if (Tab.currentScope.findSymbol(node.getProcedureName()) != null) {
-			report_error("Semanticka greska 17. Identifikator " + node.getProcedureName() + " je vec deklarisan", node);
-			return;
-		}
+		if (this.errorDetector.isNested(node, this.currentMethod, null, null)) return;
+		if (this.errorDetector.identifierRedeclaration(node.getProcedureName(), node)) return;
 		this.currentMethod = Tab.insert(Obj.Meth, node.getProcedureName(), Tab.noType);
 		this.currentMethod.setFpPos(this.currentClass == null ? 0 : 1);
 		node.obj = this.currentMethod;
 		Tab.openScope();
 		if (this.currentClass != null) {
 			Tab.insert(Obj.Var, "this", this.currentClass.getType());
-			// this.currentMethod.setLevel(this.currentMethod.getLevel()+1);
-			// Linija iznad visak jer je automatski 1 zbog ugnjezdjenja.
-			report_info("Prepoznat metod  " + this.currentMethod.getName() + " klase " + this.currentClass.getName(),
-					node);
+			report_info("Recognized method  " + this.currentMethod.getName()
+					+ " of class " + this.currentClass.getName(), node);
 		}
-		report_info("Obradjuje se procedura " + node.getProcedureName(), node);
+		report_info("Processing the procedure " + node.getProcedureName(), node);
 	}
 	
 	public void visit(FunctionSignature node) {
@@ -402,39 +261,33 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	// Resetuje se constType.
 	// Dodaje se novi parametar ako nije potrebno redeklarisanje
 	public void visit(FormalParametersList node) {
-		if (Tab.currentScope().findSymbol(node.getFormParName()) != null) {
-			report_error("Semanticka greska 18. Pokusaj redeklarisanja identifikatora " + node.getFormParName(), node);
-			this.constType = null;
-			return;
-		}
+		node.obj = Tab.noObj;
+		this.constType = null; // was needed by arrayVar, already used when visiting this node.
+		if (this.errorDetector.identifierRedeclaration(node.getFormParName(), node)) return;
 		node.obj = Tab.insert(Obj.Var, node.getFormParName(), node.getArrayVar().struct);
 		this.currentMethod.setLevel(this.currentMethod.getLevel() + 1);
-		report_info("Deklarisan parametar " + node.getFormParName() + " metoda " + this.currentMethod.getName(), node);
-		this.constType = null;
+		report_info("Declared parameter " + node.getFormParName() + " of method " + this.currentMethod.getName(), node);
 	}
 
 	// Resetuje se constType
 	// Dodaje se novi parametar ako nije potrebno redeklarisanje
 	public void visit(FormalParameter node) {
-		if (Tab.currentScope().findSymbol(node.getFormParName()) != null) {
-			report_error("Semanticka greska 19. Pokusaj redeklarisanja identifikatora " + node.getFormParName(), node);
-			this.constType = null;
-			return;
-		}
+		node.obj = Tab.noObj;
+		this.constType = null;
+		if (this.errorDetector.identifierRedeclaration(node.getFormParName(), node)) return;
 		node.obj = Tab.insert(Obj.Var, node.getFormParName(), node.getArrayVar().struct);
 		this.currentMethod.setLevel(this.currentMethod.getLevel() + 1);
-		report_info("Deklarisan parametar " + node.getFormParName() + " metoda " + this.currentMethod.getName(), node);
-		this.constType = null;
+		report_info("Declared parameter " + node.getFormParName() + " of method " + this.currentMethod.getName(), node);
 	}
 	
 	// Vraca objektni cvor metode kojoj pripada cvor
-	private Obj findMethod(SyntaxNode node) {
+	/*private Obj findMethod(SyntaxNode node) {
 		SyntaxNode parent = node.getParent();
 		while (!(parent instanceof MethodDeclaration) && (parent != null)) {
 			parent = parent.getParent();
 		}
 		if (parent == null) {
-			return null;
+			return Tab.noObj;
 		}
 		MethodDeclaration method = (MethodDeclaration)parent;
 		if (method.getMethodSignature() instanceof FunctionSignature)
@@ -442,10 +295,11 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 		if (method.getMethodSignature() instanceof ProcedureSignature) 
 			return ((ProcedureSignature)method.getMethodSignature()).getProcedureTypeName().obj;
 		report_error("Greska", node);
-		return null;
-	}
+		return Tab.noObj;
+	} */
 	
 	private Boolean containsReturn(MethodDeclaration node) {
+		node.obj = Tab.noObj;
 		StatementList statements = node.getStatementList();
 		if (statements instanceof NoStatementList) {
 			return false;
@@ -462,19 +316,15 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	
 	public void visit(ReturnStatement node) {
 		Obj expression = node.getExprOrNone().obj;
-		Obj my_method = this.findMethod(node);
+		Obj my_method = this.currentMethod;
 		if (my_method == null) {
-			report_error("Return izraz izvan metode", node);
+			report_error("Return expression outside of method", node);
+			return;
 		}
-		// expression je izvor 
-		
-		if (!this.assignableTo(expression.getType(), my_method.getType(), node)) {
-			report_error("Neodgovarajuci tipovi povratne vrijednosti i izraza kojij se vraca", node);
-		}
+		this.errorDetector.assignableTo(expression.getType(), my_method.getType(), node);
 	}
 	
-	
-	
+
 	private boolean methodIsReimplementationOf(Obj meth_1, Obj meth_2) {
 		Collection<Obj> meth_1_symbols = meth_1.getLocalSymbols(), meth_2_symbols = meth_2.getLocalSymbols();
 		Iterator<Obj> itH1 = meth_1_symbols.iterator(), itH2 = meth_2_symbols.iterator();
@@ -487,14 +337,15 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 			Obj itH1_next = itH1.next();
 			Obj itH2_next = itH2.next();
 			counter--;
-			if (itH1_next.getName() == "this") continue;
-			if (itH1_next.getName() != itH2_next.getName()) return false;
+			if (Objects.equals(itH1_next.getName(), "this")) continue;
+			if (!Objects.equals(itH1_next.getName(), itH2_next.getName())) return false;
 			if (itH1_next.getType() != itH2_next.getType()) return false;
 		}
 		return true;
 	}
 	
 	public void visit(MethodDeclaration node) {
+		node.obj = Tab.noObj;
 		Tab.chainLocalSymbols(this.currentMethod);
 		Tab.closeScope();
 
@@ -509,7 +360,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 			for (Obj symbol : symbols) {
 				if (symbol.getName().equals(this.currentMethod.getName())) {
 					if (symbol.getKind() == this.currentMethod.getKind()
-							&& this.assignableTo(this.currentMethod.getType(), symbol.getType(), node)) {
+							&& this.errorDetector.assignableTo(this.currentMethod.getType(), symbol.getType(), node)) {
 						// potrebno je uporediti sve argumente.
 						Collection<Obj> h1Obj = symbol.getLocalSymbols(), h2Obj = this.currentMethod.getLocalSymbols();
 						Iterator<Obj> itH1 = h1Obj.iterator(), itH2 = h2Obj.iterator();
@@ -546,14 +397,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 				}
 			}
 		}
-		/*if (this.currentClass != null) {
-			for (Struct interface_ : this.currentClass.getType().getImplementedInterfaces()) {
-				for (Obj symbol: interface_.getMembers()) {
-					// ovdje je potrebno dodati provjeru za interfejs
-				}
-			}
-		}*/
-	
+
 		node.obj = this.currentMethod;
 		
 		if (node.getMethodSignature() instanceof FunctionSignature && !this.containsReturn(node)) {
@@ -561,29 +405,17 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 		}
 		
 		report_info("Zavrsena obrada funkcije " + this.currentMethod.getName(), node);
-		//System.out.println("Zavrsena obrada funkcije " + this.currentMethod.getName()+  " " + this.currentMethod.getFpPos());
-		currentMethod = null;
+		this.currentMethod = null;
 
 	}
 
 	// CLASS DECLARATION
 	public void visit(ClassDeclStart node) {
-		// Otvara novi opsezni cvor za polja i metode klase.
-		if (this.currentMethod != null) {
-			report_error("Semanticka greska. Deklaracija klase " + node.getClassName() + " unutar funkcije "
-					+ this.currentMethod.getName(), node);
-			return;
-		}
-		if (this.currentClass != null) {
-			report_error("Semanticka greska. Deklaracija klase " + node.getClassName() + " unutar klase "
-					+ this.currentClass.getName(), node);
-			return;
-		}
-		this.currentClass = Tab.insert(Obj.Type, node.getClassName(),
-				new Struct(Struct.Class, new HashTableDataStructure()));
+		if (this.errorDetector.isNested(node, this.currentMethod, this.currentClass, this.currentInterface)) return;
+		this.currentClass = Tab.insert(Obj.Type, node.getClassName(), new Struct(Struct.Class, new HashTableDataStructure()));
 		Tab.openScope();
-		Tab.insert(Obj.Fld, "VTP", Tab.intType);
-		report_info("Obradjuje se klasa " + node.getClassName(), node);
+		Tab.insert(Obj.Fld, "_VTP", Tab.intType);
+		report_info("Processing class " + node.getClassName(), node);
 	}
 
 	public void visit(ExtendsDeclaration node) {
@@ -604,7 +436,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 		this.currentClass.getType().setElementType(type_node.getType());
 		for (Obj symbol : type_node.getType().getMembers()) {
 			if (symbol.getKind() == Obj.Fld) {
-				Obj new_field = Tab.insert(symbol.getKind(), symbol.getName(), symbol.getType());
+				Tab.insert(symbol.getKind(), symbol.getName(), symbol.getType());
 			}
 		}
 		// Ako klasa koju nasljedjujemo implementira neke interfejse, treba da ih implementiramo i mi.
@@ -615,6 +447,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	}
 
 	public void visit(ClassDeclaration node) {
+		node.obj = Tab.noObj;
 		Tab.chainLocalSymbols(this.currentClass);
 		var temp_table = new HashTableDataStructure();
 		// dodavanje polja u members
@@ -717,7 +550,8 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	// INTERFACE DECLARATIONS
 	
 	public void visit(InterfaceDeclStart node) {
-		if (!this.checkNoNestedness(node)) return;
+		node.obj = Tab.noObj;
+		if (this.errorDetector.isNested(node, currentMethod, currentClass, currentInterface)) return;
 		if (Tab.currentScope.findSymbol(node.getInterfaceName()) != null) {
 			report_error("Semanticka greska. Zauzet identifikator u opsegu", node);
 			return;
@@ -777,10 +611,10 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 
 	// Postavlja strukturni cvor na odgovarajucu vrstu niza ili skup.
 	public void visit(AllocateArrayFactor node) {
+		node.obj = Tab.noObj;
 
 		if (node.getExpr().obj.getType() != Tab.intType) {
 			report_error("Semanticka greska 48. Velicina niza nije cijeli broj", node);
-			node.obj = Tab.noObj;
 			return;
 		}
 
@@ -798,8 +632,10 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	// Postavlja strukturni cvor na odgovarajucu vrstu klase - trenutno se ne
 	// koristi
 	public void visit(AllocateVariableFactor node) {
+		node.obj = Tab.noObj;
 		if (node.getType().struct.getKind() != Struct.Class) {
 			report_error("Semanticka greska 49. Tip za koji se alocira prostor nije klasa", node);
+			return;
 		}
 		node.obj = new Obj(Obj.Con, null, node.getType().struct);
 	}
@@ -893,16 +729,11 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	}
 
 	public void visit(DesignatorIdentifier node) {
-		if (node.obj != null) {
+		if (node.obj != null && node.obj != Tab.noObj) {
 			report_info("Ugnjezdjeni designatori", node);
 		}
 		// pronaci objektni cvor zadatog imena.
-		Obj obj_node = Tab.noObj;
-		/*if (this.currentClass != null) {
-			obj_node = ((HashTableDataStructure)this.currentClass.getLocalSymbols()).searchKey(node.getObjectName());
-		}*/
-		
-		obj_node = Tab.find(node.getObjectName());
+		Obj obj_node = Tab.find(node.getObjectName());
 		int error_detected = 0;
 		if (obj_node == Tab.noObj) {
 			report_error(
@@ -996,7 +827,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 		// Sa lijeve strane treba da bude izraz koji se dodjeljuje, a argument je
 		// designator kome se dodjeljuje
 		// Zato sto se za this provjerava da moze da bude null.
-		if (this.assignableTo(node.getExpr().obj.getType(), node.getDesignatorList().obj.getType(), node)) {
+		if (this.errorDetector.assignableTo(node.getExpr().obj.getType(), node.getDesignatorList().obj.getType(), node)) {
 			report_info("Uspjesno prepoznat iskaz dodjele", node);
 		}
 	}
@@ -1004,6 +835,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	// TERM
 
 	public void visit(NextFactorExpression node) {
+		node.obj = Tab.noObj;
 
 		if (node.getTermNext().obj == null) {
 			// u pitanju je epsilon smjena, nema narednog
@@ -1018,10 +850,13 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	}
 
 	public void visit(Term node) {
-		if (node.getTermNext().obj != null && node.getFactor().obj.getType() != node.getTermNext().obj.getType())
+		node.obj = Tab.noObj;
+		if (node.getTermNext().obj != null && node.getFactor().obj.getType() != node.getTermNext().obj.getType()) {
 			// ako next term nije null, ne mora da se radi mnozenje pa ne mora da bude
 			// cijeli broj
 			report_error("Semanticka greska 37. Mnozenje podataka razlicitog tipa", node);
+			return;
+		}
 		node.obj = node.getFactor().obj;
 		report_info("Zavrsen obilazak jednog Term cvora", node);
 	}
@@ -1064,7 +899,6 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 
 	public void visit(ReadStatement node) {
 		Obj my_designator = node.getDesignatorList().obj;
-		// Trebace Obj.Elem.
 		if (my_designator.getKind() != Obj.Var && my_designator.getKind() != Obj.Type
 				&& my_designator.getKind() != Obj.Fld && my_designator.getKind() != Obj.Elem) {
 			report_error("Semanticka greska 629. Read ne sadrzi promjenlijvu, element niza ili polje", node);
@@ -1161,7 +995,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 				}
 				
 				
-				if (this.assignableTo(parameter_types[form_par.getAdr()], form_par.getType(), node)) {
+				if (this.errorDetector.assignableTo(parameter_types[form_par.getAdr()], form_par.getType(), node)) {
 					report_info("Parametar " + form_par.getName() + " je odgovarajuceg tipa", node);
 				} else {
 					report_error("Parametar " + form_par.getName() + " nije odgovarajuceg tipa", node);
@@ -1196,7 +1030,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 			}
 		} else {
 			Obj rightOperand = ((ComparisonExpression) node.getRelExprOrNone()).getExpr().obj;
-			if (!this.compatibleWith(leftOperand.getType(), rightOperand.getType(), node)) {
+			if (!this.errorDetector.compatibleWith(leftOperand.getType(), rightOperand.getType(), node)) {
 				report_error("Semanticka greska. Nekompatibilni tipovi u relacionom operatoru", node);
 			}
 			if (rightOperand.getType().getKind() == Struct.Class || rightOperand.getType().getKind() == Struct.Array) {

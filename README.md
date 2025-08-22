@@ -1,7 +1,7 @@
-# micro_java_compiler
-Compiler for MicroJava programming language.
+# MicroJava Compiler
+Compiler For MicroJava Programming Language.
 
-# Running the project
+## Running the project
 All codes for testing are stored in the test folder.
 To run an mj file, put it in the test folder. 
 Run

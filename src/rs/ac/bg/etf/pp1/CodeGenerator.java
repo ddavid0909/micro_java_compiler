@@ -8,20 +8,21 @@ import rs.etf.pp1.symboltable.concepts.Struct;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 import rs.ac.bg.etf.pp1.ast.*;
 
 public class CodeGenerator extends VisitorAdaptor {
 	private int mainPc;
-	private HashMap<SyntaxNode, ArrayList<Integer>> addresses = new HashMap<>();
-	private HashMap<SyntaxNode, Integer> backward_jumps = new HashMap<>();
-	private HashMap<Struct, ArrayList<Integer>> needed_vtps = new HashMap<>();
-	private HashMap<Struct, Integer> class_vtp = new HashMap<>();
+	private final HashMap<SyntaxNode, ArrayList<Integer>> addresses = new HashMap<>();
+	private final HashMap<SyntaxNode, Integer> backward_jumps = new HashMap<>();
+	private final HashMap<Struct, ArrayList<Integer>> needed_virtual_table_pointers = new HashMap<>();
+	private final HashMap<Struct, Integer> class_virtual_table_pointer = new HashMap<>();
 	private Obj program_node;
-	int nvars;
+	int n_vars;
 	
-	public CodeGenerator(int nvars) {
-		this.nvars = nvars;
+	public CodeGenerator(int n_vars) {
+		this.n_vars = n_vars;
 	}
 	
 	public int getMainPc() {
@@ -65,12 +66,10 @@ public class CodeGenerator extends VisitorAdaptor {
 	
 	
 	private void methodStart(Obj methNode) {
-		
 		methNode.setAdr(Code.pc);
 		if (methNode.getName().equalsIgnoreCase("main")) {
 			this.mainPc = Code.pc;
 		}
-		
 		int parameters = methNode.getLevel();
 		int altogether = methNode.getLocalSymbols().size();
 		Code.put(Code.enter);
@@ -83,18 +82,15 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 	
 	private void methodStart(Obj methNode, int additional) {
-		
 		methNode.setAdr(Code.pc);
 		if (methNode.getName().equalsIgnoreCase("main")) {
 			this.mainPc = Code.pc;
 		}
-		
 		int parameters = methNode.getLevel();
 		int altogether = parameters + additional;
 		Code.put(Code.enter);
 		Code.put(parameters);
 		Code.put(altogether);
-		//Code.put(Code.call);
 	}
 	
 	public void visit(ProcedureTypeName node ) {
@@ -731,14 +727,14 @@ public class CodeGenerator extends VisitorAdaptor {
 		Code.put2(node.obj.getType().getNumberOfFields()*4);
 		
 		Code.put(Code.dup);
-		if (this.class_vtp.containsKey(node.obj.getType())) {
-			Code.loadConst(this.class_vtp.get(node.obj.getType()));
+		if (this.class_virtual_table_pointer.containsKey(node.obj.getType())) {
+			Code.loadConst(this.class_virtual_table_pointer.get(node.obj.getType()));
 		} else {
 			Code.put(Code.const_); 
-			if (!this.needed_vtps.containsKey(node.obj.getType())) {
-				this.needed_vtps.put(node.obj.getType(), new ArrayList<>());
+			if (!this.needed_virtual_table_pointers.containsKey(node.obj.getType())) {
+				this.needed_virtual_table_pointers.put(node.obj.getType(), new ArrayList<>());
 			}
-			this.needed_vtps.get(node.obj.getType()).add(Code.pc);
+			this.needed_virtual_table_pointers.get(node.obj.getType()).add(Code.pc);
 			Code.put4(0);
 		}
 		// a adresa se sacuva u hes tabelu
@@ -1248,36 +1244,34 @@ public class CodeGenerator extends VisitorAdaptor {
 	
 	private void initializeVTPs() {
 		for (Obj symbol : this.program_node.getLocalSymbols()) {
-			if (symbol.getType().getKind() == Struct.Class && symbol.getName() != "null") {
-				Obj vtp_node = symbol.getType().getMembersTable().searchKey("VTP");
-				
-				ArrayList<Integer> vtp_addresses = this.needed_vtps.get(symbol.getType());
+			if (symbol.getType().getKind() == Struct.Class && !Objects.equals(symbol.getName(), "null")) {
+				ArrayList<Integer> vtp_addresses = this.needed_virtual_table_pointers.get(symbol.getType());
 				if (vtp_addresses != null) {
 					for (Integer vtp_address : vtp_addresses) {
-						Code.put2(vtp_address, this.nvars >> 16);
-						Code.put2(vtp_address+2, this.nvars);
+						Code.put2(vtp_address, this.n_vars >> 16);
+						Code.put2(vtp_address+2, this.n_vars);
 					}
 				}
-				this.class_vtp.put(symbol.getType(), this.nvars);
+				this.class_virtual_table_pointer.put(symbol.getType(), this.n_vars);
 				
 				for (Obj element: symbol.getType().getMembers()) {
 					if (element.getKind() == Obj.Meth) {
 						for (int i = 0 ; i < element.getName().length(); i++) {
 							Code.loadConst(element.getName().charAt(i));
 							Code.put(Code.putstatic);
-							Code.put2(this.nvars++);
+							Code.put2(this.n_vars++);
 						}
 						Code.loadConst(-1);
 						Code.put(Code.putstatic);
-						Code.put2(this.nvars++);
+						Code.put2(this.n_vars++);
 						Code.loadConst(element.getAdr());
 						Code.put(Code.putstatic);
-						Code.put2(this.nvars++);
+						Code.put2(this.n_vars++);
 					}
 				}
 				Code.loadConst(-2);
 				Code.put(Code.putstatic);
-				Code.put2(this.nvars++);
+				Code.put2(this.n_vars++);
 				
 			}
 			

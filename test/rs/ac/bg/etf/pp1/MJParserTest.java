@@ -48,23 +48,23 @@ public class MJParserTest {
 			log.info(prog.toString(""));
 			log.info("===================================");
 			MJParserTest.addToUniverse();
-			SemanticAnalyzer semanticPass = new SemanticAnalyzer();
-			prog.traverseBottomUp(semanticPass);
+			SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
+			prog.traverseBottomUp(semanticAnalyzer);
 			log.info("===================================");
 			Tab.dump(new BooleanDumpSymbolTableVisitor());
 			
-			if (!semanticPass.errorDetected && !parser.errorDetected) {
+			if (!semanticAnalyzer.errorDetected && !parser.errorDetected) {
 				File objFile = new File("test/"+args[0].substring(0, args[0].length() - 3) + ".obj");
 				if (objFile.exists()) objFile.delete();
-				CodeGenerator codeGenerator = new CodeGenerator(semanticPass.nvars);
+				CodeGenerator codeGenerator = new CodeGenerator(semanticAnalyzer.n_vars);
 				prog.traverseBottomUp(codeGenerator);
-				Code.dataSize = codeGenerator.nvars;
+				Code.dataSize = codeGenerator.n_vars;
 				Code.mainPc = codeGenerator.getMainPc();
 				Code.write(new FileOutputStream(objFile));
 			} else {
 				if (parser.errorDetected)
 					System.out.println("Syntax errors found during parsing!");
-				if (semanticPass.errorDetected)
+				if (semanticAnalyzer.errorDetected)
 					System.out.println("Semantic errors found during analysis!");
 			}
 			

@@ -18,7 +18,7 @@ public class DesignatorIterator {
 		 if (parent instanceof ClassFieldAccess) {
 			 return ((ClassFieldAccess)parent).getMemberIdentifier().obj;
 		 }
-		 return null;
+		 return Tab.noObj;
 	 }
 	
 	public static Obj getPreviousDesignator(MemberIdentifier node) {
@@ -33,7 +33,7 @@ public class DesignatorIterator {
 			 return((ArrayElementAccess)parent).getArrayIdentifier().obj;
 		 }
 		 System.out.println("NESTO LOSE 35");
-		 return null;
+		 return Tab.noObj;
 	 }
 	
 	public static Obj getPreviousDesignator(DesignatorListEnd node) {
@@ -47,7 +47,7 @@ public class DesignatorIterator {
 		 if (parent instanceof ArrayElementAccess) {
 			 return((ArrayElementAccess)parent).getArrayIdentifier().obj;
 		 }
-		 return null;
+		 return Tab.noObj;
 	}
 	
 	
@@ -60,7 +60,7 @@ public class DesignatorIterator {
 				designator_next = ((ClassFieldAccess)designator_next).getDesignatorNext();
 			} else {
 				System.out.println("DesignatorNext nedefinisanog tipa " + node.getLine());
-				return null;
+				return Tab.noObj;
 			}
 			
 		}
@@ -72,8 +72,5 @@ public class DesignatorIterator {
 		return node.getType().getElemType();
 		
 	}
-	
-	public static Struct searchType(Obj node, String field) {
-		return ((HashTableDataStructure)node.getLocalSymbols()).searchKey(field).getType();
-	}
+
 }
