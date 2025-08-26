@@ -53,7 +53,7 @@ public class MJParserTest {
 			log.info("===================================");
 			Tab.dump(new BooleanDumpSymbolTableVisitor());
 			
-			if (!semanticAnalyzer.errorDetected && !parser.errorDetected) {
+			if (!semanticAnalyzer.getErrorDetected() && !parser.errorDetected) {
 				File objFile = new File("test/"+args[0].substring(0, args[0].length() - 3) + ".obj");
 				if (objFile.exists()) objFile.delete();
 				CodeGenerator codeGenerator = new CodeGenerator(semanticAnalyzer.n_vars);
@@ -64,7 +64,7 @@ public class MJParserTest {
 			} else {
 				if (parser.errorDetected)
 					System.out.println("Syntax errors found during parsing!");
-				if (semanticAnalyzer.errorDetected)
+				if (semanticAnalyzer.getErrorDetected())
 					System.out.println("Semantic errors found during analysis!");
 			}
 			
