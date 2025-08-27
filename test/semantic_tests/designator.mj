@@ -1,4 +1,4 @@
-program MJProgram
+program designator
 	int a, b;
 	int b;
 	const int c = 5, d = 6;
@@ -68,10 +68,6 @@ program MJProgram
 		}
 	}
 	
-	class Class_4 extends int {
-		
-	}
-	
 	class Class_5 {
 		int r_5;
 		int r_8[];
@@ -118,24 +114,26 @@ program MJProgram
 	}
 	
 {
-	int main(bool main_a[], char main_c[], int main_b
-	) 
-		int a[], b, c[];
-		bool d[];
-	{
-		x = y + 5 + 3;
-		d[2] = true;
-		print(1);
-		print(2);
-		
-		k();
-	}
-	
-	char k_func(bool k_a[], char k_c, bool k_b, int k_arr[]
+	void main(
 	)
-		int k_zz;
-		bool k_z_k[];
 	{
-		return 5;
 	}
+
 }
+
+//     [java] ERROR 22:35:56,969 - Semantic error. Identifier 'b' redeclared on line 3
+//     [java] ERROR 22:35:56,970 - Semantic error. Basic types mismatch on line 9
+//     [java] ERROR 22:35:56,970 - Semantic error. Basic types mismatch on line 9
+//     [java] ERROR 22:35:56,979 - Semantic error. Basic types mismatch on line 86
+//     [java] ERROR 22:35:56,979 - Semantic error. Basic types mismatch on line 86
+//     [java] ERROR 22:35:56,979 - Semantic error. m cannot be modified on line 90
+//     [java] ERROR 22:35:56,980 - Semantic error. m cannot be modified on line 95
+//     [java] ERROR 22:35:56,980 - Semantic error. Erroneous assignment on line 96
+//     [java] ERROR 22:35:56,980 - Semantic error. Erroneous assignment on line 97
+//     [java] ERROR 22:35:56,980 - Semantic error. Erroneous assignment on line 98
+//     [java] ERROR 22:35:56,980 - Semantic error. Basic types mismatch on line 104
+//     [java] ERROR 22:35:56,980 - Semantic error. Erroneous assignment on line 104
+//     [java] ERROR 22:35:56,980 - Semantic error. Basic types mismatch on line 105
+//     [java] ERROR 22:35:56,980 - Semantic error. Erroneous assignment on line 105
+//     [java] ERROR 22:35:56,981 - Semantic error. Improper use of identifier int on line 107
+//     [java] ERROR 22:35:56,981 - Semantic error. Erroneous assignment on line 107

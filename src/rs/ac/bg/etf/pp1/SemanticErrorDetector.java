@@ -91,8 +91,6 @@ public class SemanticErrorDetector {
             if (dest.getElemType() == Tab.noType) return true;
             return this.assignableTo(src.getElemType(), dest.getElemType(), node);
         }
-        System.out.println(src.getKind());
-        System.out.println(dest.getKind());
         report_error("Semantic error. Erroneous assignment", node);
         return false;
     }
@@ -157,8 +155,6 @@ public class SemanticErrorDetector {
 
     public boolean typesMatchExactly(Struct type_1, Struct type_2, SyntaxNode node) {
         if (type_1 != type_2) {
-            System.out.println(type_1.getKind());
-            System.out.println(type_2.getKind());
             report_error("Semantic error. Basic types mismatch", node);
             return false;
         }
@@ -289,7 +285,7 @@ public class SemanticErrorDetector {
                         Obj itH2_next = itH2.next();
                         counter--;
                         if (!(itH1_next.getType() == itH2_next.getType() ||
-                                (itH1_next.getKind() == Struct.Array && itH2_next.getKind() == Struct.Array
+                                (itH1_next.getType().getKind() == Struct.Array && itH2_next.getType().getKind() == Struct.Array
                                         && itH1_next.getType().getElemType() == itH2_next.getType().getElemType())
                                 || (itH1_next.getName().equals(itH2_next.getName())
                                 && itH1_next.getName().equals("this")))) {

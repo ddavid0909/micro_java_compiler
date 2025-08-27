@@ -5,16 +5,12 @@ program MJProgram
 	const char f = 't', g = 'a';
 	int aa[], bb, cc[], dd[], ee;
 	const bool h = true, i = false;
-	// ispod su neispravni izrazi
-	const bool j = 4, k = '5', l = true;
-	char ff[], gg, hh[];
 	bool r, s, t;
 	const int m = 4, n = 7;
 	char o, p, q;
 
 {
-	int main(bool main_a[], char main_c[], int main_b
-	) 
+	void main()
 		int zz[], zzz, zzzz[];
 		bool z5[];
 	{
@@ -24,12 +20,5 @@ program MJProgram
 		
 		k();
 	}
-	
-	char k_func(bool k_a[], char k_c, bool k_b, int k_arr[]
-	)
-		int k_zz;
-		bool k_z_k[];
-	{
-		return 5;
-	}
+
 }

@@ -42,6 +42,11 @@ public class MJParserTest {
 			
 			MJParser parser = new MJParser(lexer);
 	        Symbol s = parser.parse();
+
+			if (parser.errorDetected) {
+				System.out.println("Syntax errors found during parsing! Cannot proceed with semantic analysis.");
+				return;
+			}
 	        
 	        Program prog = (Program)(s.value); 
 	        Tab.init();
@@ -52,21 +57,19 @@ public class MJParserTest {
 			prog.traverseBottomUp(semanticAnalyzer);
 			log.info("===================================");
 			Tab.dump(new BooleanDumpSymbolTableVisitor());
-			
-			if (!semanticAnalyzer.getErrorDetected() && !parser.errorDetected) {
-				File objFile = new File("test/"+args[0].substring(0, args[0].length() - 3) + ".obj");
-				if (objFile.exists()) objFile.delete();
-				CodeGenerator codeGenerator = new CodeGenerator(semanticAnalyzer.n_vars);
-				prog.traverseBottomUp(codeGenerator);
-				Code.dataSize = codeGenerator.n_vars;
-				Code.mainPc = codeGenerator.getMainPc();
-				Code.write(new FileOutputStream(objFile));
-			} else {
-				if (parser.errorDetected)
-					System.out.println("Syntax errors found during parsing!");
-				if (semanticAnalyzer.getErrorDetected())
-					System.out.println("Semantic errors found during analysis!");
+
+			if (semanticAnalyzer.getErrorDetected()) {
+				System.out.println("Semantic errors found during analysis! Cannot proceed with code generation");
+				return;
 			}
+
+			File objFile = new File("test/"+args[0].substring(0, args[0].length() - 3) + ".obj");
+			if (objFile.exists()) objFile.delete();
+			CodeGenerator codeGenerator = new CodeGenerator(semanticAnalyzer.n_vars);
+			prog.traverseBottomUp(codeGenerator);
+			Code.dataSize = codeGenerator.n_vars;
+			Code.mainPc = codeGenerator.getMainPc();
+			Code.write(new FileOutputStream(objFile));
 			
 		} 
 		finally {

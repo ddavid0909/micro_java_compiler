@@ -61,9 +61,12 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         this.currentType = node.getType().struct;
     }
 
-    // Postavlja brojnu vrijednost numericke konstante.
+    // ONE CONSTANT nodes
+    // following three nodes check that actual type of constant matches the type specified
+    // at the beginning of declaration. In case of mismatch, semantic analysis will proceed with type of the actual
+    // constant (5, 'c', true) and not type that is defined at the beginning of declaration (int, bool, char).
+    // See symbol table of semantic_analysis/const_decl/badTypes.mj
     public void visit(NumberConstant node) {
-        // There was check for this.constType == null, should be impossible based on syntax rules.
         this.errorDetector.typesMatchExactly(this.currentType, Tab.intType, node);
         node.struct = Tab.intType;
     }
@@ -79,8 +82,6 @@ public class SemanticAnalyzer extends VisitorAdaptor {
     }
 
     public void visit(NextConstDeclaration node) {
-        // TO-DO is null check for constType missing? Syntax analysis would not allow CurConstType to be missing
-        this.errorDetector.typesMatchExactly(node.getOneConst().struct, this.currentType, node);
         if (this.errorDetector.identifierRedeclaration(node.getConstName(), node)) {
             return;
         }
@@ -100,13 +101,11 @@ public class SemanticAnalyzer extends VisitorAdaptor {
     }
 
     public void visit(ConstDeclaration node) {
-        this.errorDetector.typesMatchExactly(node.getOneConst().struct, this.currentType, node);
-        // constant type variable must be reset after declaration line is completely processed.
         this.currentType = null;
         if (this.errorDetector.identifierRedeclaration(node.getConstName(), node)) {
             return;
         }
-        node.obj = Tab.insert(Obj.Con, node.getConstName(), node.getCurConstType().getType().struct);
+        node.obj = Tab.insert(Obj.Con, node.getConstName(), node.getOneConst().struct);
 
         String type = "";
         if (node.getOneConst().struct == Tab.intType) {
@@ -148,8 +147,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         }
     }
 
-    // Provjerava da li je promjenljiva deklarisana u opsegu
-    // i ako nije dodaje je.
+
     public void visit(NextVariableDeclaration node) {
         if (this.errorDetector.identifierRedeclaration(node.getVarName(), node)) {
             return;
@@ -601,33 +599,25 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         // designator kome se dodjeljuje
         // Zato sto se za this provjerava da moze da bude null.
 
-        if (this.errorDetector.assignableTo(node.getExpr().obj.getType(), node.getDesignatorList().obj.getType(), node)) {
-            report_info("Uspjesno prepoznat iskaz dodjele", node);
-        }
+        this.errorDetector.assignableTo(node.getExpr().obj.getType(), node.getDesignatorList().obj.getType(), node);
     }
-
+    // TERMS AND EXPRESSIONS
+    // Expression and Term can be non-integer if they are standalone. If another term and expression appears concatenated
+    // all terms and expressions must be integer as they can only be concatenated by multiplicative and additive operators.
     // TERM
 
     public void visit(NextFactorExpression node) {
-        node.obj = Tab.noObj;
-
-        if (node.getTermNext() instanceof NoNextFactorExpression) {
-            // u pitanju je epsilon smjena, nema narednog
-            // dovoljno je za ovaj provjeriti da li je int, jer ce se za sve ostale
-            // provjeravati jednakost tipova.
-            this.errorDetector.typesMatchExactly(node.getFactor().obj.getType(), Tab.intType, node);
-        } else {
-            this.errorDetector.typesMatchExactly(node.getFactor().obj.getType(), node.getTermNext().obj.getType(), node);
-        }
+        this.errorDetector.typesMatchExactly(node.getFactor().obj.getType(), Tab.intType, node);
         node.obj = node.getFactor().obj;
     }
 
-    public void visit(Term node) {
+    public void visit(NoNextFactorExpression node) {
         node.obj = Tab.noObj;
+    }
+
+    public void visit(Term node) {
         if (!(node.getTermNext() instanceof NoNextFactorExpression)) {
-            if (!this.errorDetector.typesMatchExactly(node.getFactor().obj.getType(), node.getTermNext().obj.getType(), node)) return;
-            // ako next term nije null, ne mora da se radi mnozenje pa ne mora da bude
-            // cijeli broj
+            this.errorDetector.typesMatchExactly(node.getFactor().obj.getType(), Tab.intType, node);
         }
         node.obj = node.getFactor().obj;
     }
@@ -642,33 +632,22 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         node.obj = Tab.noObj;
     }
 
-    public void visit(NoNextFactorExpression node) {
-        node.obj = Tab.noObj;
-    }
-
     public void visit(Expression node) {
         if (!(node.getExprNext() instanceof NoNextTermExpression)) {
-            this.errorDetector.typesMatchExactly(node.getTerm().obj.getType(), node.getExprNext().obj.getType(), node);
+            this.errorDetector.typesMatchExactly(node.getTerm().obj.getType(), Tab.intType, node);
         }
         node.obj = node.getTerm().obj;
     }
 
+    // can only negate number
     public void visit(NegativeExpression node) {
-        if (!(node.getExprNext() instanceof NoNextTermExpression)) {
-            this.errorDetector.typesMatchExactly(node.getExprNext().obj.getType(), node.getExprNext().obj.getType(), node);
-        }
+        this.errorDetector.typesMatchExactly(node.getTerm().obj.getType(), Tab.intType, node);
         node.obj = node.getTerm().obj;
-        // can only negate number
-        this.errorDetector.typesMatchExactly(node.obj.getType(), Tab.intType, node);
     }
 
     public void visit(NextTermExpression node) {
+        this.errorDetector.typesMatchExactly(node.getTerm().obj.getType(), Tab.intType, node);
         node.obj = node.getTerm().obj;
-        if (node.getExprNext() instanceof NoNextTermExpression) {
-            this.errorDetector.typesMatchExactly(node.getTerm().obj.getType(), Tab.intType, node);
-            return;
-        }
-        this.errorDetector.typesMatchExactly(node.getTerm().obj.getType(), node.getExprNext().obj.getType(), node);
     }
 
     public void visit(NoNextTermExpression node) {
@@ -768,7 +747,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 
     public void visit(MaxArrayElementDesignatorFactor node) {
         node.obj = Tab.noObj;
-        // Potrebno provjeriti da se radi o nizu cijelih brojeva
+        // operator works only on array element or integer array
         this.errorDetector.hashOperatorErrors(node);
         node.obj = new Obj(Obj.Con, null, Tab.intType);
     }

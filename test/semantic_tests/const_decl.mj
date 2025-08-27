@@ -1,4 +1,4 @@
-program MJProgram
+program constDecl
 	int a;
 	int b;
 	const int c = 5, d = 6;
@@ -11,3 +11,7 @@ program MJProgram
 {
 
 }
+
+//      [java] ERROR 22:27:20,441 - Semantic error. Basic types mismatch on line 8
+//      [java] ERROR 22:27:20,441 - Semantic error. Basic types mismatch on line 8
+//      [java] ERROR 22:27:20,441 - Semantic error. Procedure 'main' is missing from the program on line 1

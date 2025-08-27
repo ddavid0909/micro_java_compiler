@@ -1,4 +1,4 @@
-program MJProgram
+program ClassDecl
 	int a, b;
 	int b;
 	const int c = 5, d = 6;
@@ -108,3 +108,14 @@ program MJProgram
 		return 5;
 	}
 }
+
+//     [java] ERROR 22:23:49,290 - Semantic error. Identifier 'b' redeclared on line 3
+//     [java] ERROR 22:23:49,291 - Semantic error. Basic types mismatch on line 9
+//     [java] ERROR 22:23:49,292 - Semantic error. Basic types mismatch on line 9
+//     [java] ERROR 22:23:49,302 - Semantic error. Type neither class nor interface on line 71
+//     [java] ERROR 22:23:49,304 - Semantic error. Basic types mismatch on line 96
+//     [java] ERROR 22:23:49,304 - Semantic error. Improper use of identifier k on line 100
+//     [java] ERROR 22:23:49,304 - Function does not contain a return statement on line 91
+//     [java] ERROR 22:23:49,304 - Semantic error. Erroneous assignment on line 108
+//     [java] ERROR 22:23:49,304 - Semantic error. Basic types mismatch on line 1
+//     [java] ERROR 22:23:49,309 - Semantic error. Expected number of parameters 0 on line 1
