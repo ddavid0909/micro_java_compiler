@@ -1,0 +1,62 @@
+// method call designator statement vs designator factor that is a function.
+program methodCall
+int a;
+bool b;
+char c;
+class Class_1 {
+    int r1;
+    char r2;
+    {
+    void meth_1() {
+        print(r1);
+    }
+    int meth_2() {
+        print(r2);
+        return 0;
+    }
+    }
+}
+
+interface int1 {
+    void display();
+    int two_plus_five();
+    char c() {
+        return 'c';
+    }
+}
+
+class Class_3 extends int1 {
+{
+    void display() {
+        print('D');
+    }
+    int two_plus_five() {
+        return 2+5;
+    }
+    }
+}
+
+{
+    void fun() {
+        print('F',1); print('U',1); print('N',1);
+    }
+
+    int fun_int() {
+        return 1;
+    }
+
+    void main() Class_1 c1; Class_3 c3; {
+        c1 = new Class_1();
+        c1.meth_1();
+        c1.meth_2();
+        a = c1.meth_1();
+        a = c1.meth_2();
+        a = fun();
+        a = fun_int();
+        c3 = new Class_3();
+        c3.display();
+        c3.two_plus_five();
+        a = c3.display();
+        a = c3.two_plus_five();
+    }
+}

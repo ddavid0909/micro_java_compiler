@@ -56,7 +56,7 @@ public class MJParserTest {
 			SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
 			prog.traverseBottomUp(semanticAnalyzer);
 			log.info("===================================");
-			Tab.dump(new BooleanDumpSymbolTableVisitor());
+			//Tab.dump(new BooleanDumpSymbolTableVisitor());
 
 			if (semanticAnalyzer.getErrorDetected()) {
 				System.out.println("Semantic errors found during analysis! Cannot proceed with code generation");

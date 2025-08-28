@@ -1,4 +1,4 @@
-program MJProgram
+program varDecl
 	int a, b;
 	int b;
 	const int c = 5, d = 6;

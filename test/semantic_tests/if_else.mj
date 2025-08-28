@@ -1,0 +1,66 @@
+program ifElse
+// Conditions have a couple semantic rules:
+// If values are compared, they must be compatible.
+// If there is only one value, it must be boolean.
+// Reference types (for which data is allocated on the heap) can only be compared with == and !=
+class Class_1 {
+
+}
+
+interface int_1 {
+
+}
+
+interface int_2 {
+}
+
+class Class_2 extends int_1 {
+}
+
+{
+    void main() Class_1 c1; Class_2 c2; int_1 i1; set s1; set s2; int_2 i2; int arr[]; bool boolean;{
+        // Single factor
+        if (1 < 'c') return; // incompatible
+        if (true < false) return;
+        if (1 == true) return;
+        if (c1 == c2) return; // different class hierarchies
+        if (c1 == i1) return; // interface not implemented
+        if (i1 != c2) return;
+        if (i1 < c2) return;
+        if ('c' < 'd') return;
+        if ('c' == null) return;
+        if (s1 == s2) return;
+        if (s1 < s2) return;
+        if (s1 == null) return;
+        // no relop
+        if (1) return;
+        if ('c') return;
+        if (null) return;
+        if (arr) return;
+        if (true) return;
+        if (boolean) return;
+        // Incomparable ref types
+        if (i1 == i2) return;
+        if (s1 == i1) return;
+        if (arr == i1) return;
+        if (arr == c1) return;
+        if (arr == s1) return;
+        // Multiple factors present
+        if (1 == 1 && 1 < 'c') return;
+        if (1 == 1 && 1 == true) return;
+        if (1 == 1 && c1 == c2) return;
+        if (1 == 1 && c1 < c2) return;
+        if (1 == 1 && i1 < c2) return;
+        if (1 == 1 && 'c' == null) return;
+        if (1 == 1 && s1 < s2) return;
+        if (1 == 1 && 1) return;
+        if (1 == 1 && 'c') return;
+        if (1 == 1 && null) return;
+        if (1 == 1 && arr) return;
+        if (1 == 1 && true) return;
+        if (1 == 1 && boolean) return;
+        // Multiple terms present
+        if (1 < 'c' || c1 == c2 || i1 < c2 && s1 < s2 || 'c' == null && arr == c1 || arr == null) return;
+
+    }
+}

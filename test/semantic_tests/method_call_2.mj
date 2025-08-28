@@ -1,0 +1,42 @@
+program methodCall2
+// tests actual and formal parameter check
+// THIS TEST BREAKS THE SYMBOL TABLE DUMP in MJParserTest
+class Class_1 {
+    {
+        void fun(int a, char b, char e[], set s) {
+
+        }
+        void f() {
+
+        }
+        void fc(Class_1 c) {
+        }
+    }
+}
+{
+    void fun(int a, char b, bool c, int d[], char e[], bool f[]) {
+
+    }
+    void main() int a; char b; bool c; int d[]; char e[]; bool f[]; Class_1 c1; set s;{
+        fun(a, b, c, d, e, f);
+        fun(a, a, a, d, d, d);
+        fun(a);
+        fun(a, b, c, d, e, f, f, f, f);
+        fun(a, b, c, d, e, f, f);
+        fun(f, e, d, c, b, a);
+        fun(a, a, a, null, null, null);
+        fun(0, 'a', true, null, null, null);
+        // class methods
+        c1 = new Class_1();
+        c1.fun(a, b, e, s);
+        c1.fun(c, a, b, e, s);
+        c1.f();
+        c1.f(c1);
+        c1.f(a);
+        c1.fc(c1, c1);
+        c1.fc(c1);
+        c1.fc(null);
+
+
+    }
+}

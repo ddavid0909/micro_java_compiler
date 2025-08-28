@@ -1,12 +1,14 @@
 package rs.ac.bg.etf.pp1;
 
-import org.apache.log4j.Logger;
-
 import rs.ac.bg.etf.pp1.ast.*;
 import rs.etf.pp1.symboltable.*;
 import rs.etf.pp1.symboltable.concepts.*;
 import rs.etf.pp1.symboltable.structure.*;
 
+/**
+ * Abstract Syntax Tree Visitor.
+ * Performs Semantic analysis on the generated AST if no syntax errors were found.
+ */
 public class SemanticAnalyzer extends VisitorAdaptor {
     public static final Struct boolType = new Struct(Struct.Bool);
     public static final Struct setType = new Struct(8);
@@ -27,6 +29,11 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         //System.out.println(msg.toString());
     }
 
+    /**
+     * Checks whether semantic errors were found.
+     *
+     * @return true if there were semantic errors.
+     */
     public boolean getErrorDetected() {
         return this.errorDetector.errorDetected;
     }
@@ -35,10 +42,18 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 
     public void visit(ProgName progName) {
         progName.obj = Tab.insert(Obj.Prog, progName.getProgName(), Tab.noType);
-        report_info("Vrsi se semanticka analiza programa cije je ime " + progName.getProgName() + "dato", progName);
+        report_info("Semantic analysis of program " + progName.getProgName() + " started", progName);
         Tab.openScope();
     }
 
+    /**
+     * Visits Program node (the root node of the AST). <br>
+     * Requires that main exist. <br>
+     * Requires that main return type be void. <br>
+     * Requires that main be with no parameters.<br>
+     *
+     * @param program - the root node of the AST.
+     */
     public void visit(Program program) {
         program.obj = Tab.noObj;
         Obj main_node = Tab.currentScope.findSymbol("main");
@@ -54,7 +69,11 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 
     // CONSTANT DECLARATION
 
-    // Postavlja tip konstante za cijeli red.
+    /**
+     * Sets expected type for all constants in the line.
+     *
+     * @param node AST node that contains the type.
+     */
     public void visit(CurConstType node) {
         // TO-DO decide whether to change const type in case of nestedness or ignore the case since it shouldn't happen
         this.errorDetector.nestedConstOrVariableDeclaration(this.currentType, node);
@@ -66,21 +85,45 @@ public class SemanticAnalyzer extends VisitorAdaptor {
     // at the beginning of declaration. In case of mismatch, semantic analysis will proceed with type of the actual
     // constant (5, 'c', true) and not type that is defined at the beginning of declaration (int, bool, char).
     // See symbol table of semantic_analysis/const_decl/badTypes.mj
+
+    /**
+     * Requires that expected type be integer for number constant
+     *
+     * @param node
+     */
     public void visit(NumberConstant node) {
         this.errorDetector.typesMatchExactly(this.currentType, Tab.intType, node);
         node.struct = Tab.intType;
     }
 
+    /**
+     * Requires that expected type be character for character constant
+     *
+     * @param node
+     */
     public void visit(CharacterConstant node) {
         this.errorDetector.typesMatchExactly(this.currentType, Tab.charType, node);
         node.struct = Tab.charType;
     }
 
+    /**
+     * Requires that expected type be boolean for boolean constant
+     *
+     * @param node
+     */
     public void visit(BooleanConstant node) {
         this.errorDetector.typesMatchExactly(this.currentType, SemanticAnalyzer.boolType, node);
         node.struct = boolType;
     }
 
+    /**
+     * Requires that there be no same identifier declaration in the same scope. <br>
+     * Inserts a new object node for the constant. <br>
+     * Type of the object node corresponds to the type of the OneConst
+     * (number, character, boolean) and not to the expected type written at the beginning of the line. <br>
+     *
+     * @param node
+     */
     public void visit(NextConstDeclaration node) {
         if (this.errorDetector.identifierRedeclaration(node.getConstName(), node)) {
             return;
@@ -100,6 +143,15 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         report_info("Declared constant " + node.getConstName() + " of type " + type, node);
     }
 
+    /**
+     * Requires that there be no same identifier declaration in the same scope. <br>
+     * Inserts a new object node for the constant. <br>
+     * Type of the object node corresponds to the type of the OneConst
+     * (number, character, boolean) and not to the expected type written at the beginning of the line. <br>
+     * Resets expected type to null, as this is the end of one line <br>
+     *
+     * @param node
+     */
     public void visit(ConstDeclaration node) {
         this.currentType = null;
         if (this.errorDetector.identifierRedeclaration(node.getConstName(), node)) {
@@ -122,18 +174,39 @@ public class SemanticAnalyzer extends VisitorAdaptor {
     }
 
     // VARIABLE DECLARATION
-    // Postavlja tip promjenljive za cijeli red.
+
+    /**
+     * Sets expected type for all variables in the line.
+     *
+     * @param node AST node that contains the type.
+     */
     public void visit(CurVarType node) {
         this.errorDetector.nestedConstOrVariableDeclaration(this.currentType, node);
         this.currentType = node.getType().struct;
     }
 
     // if not array variable, keeps the data type of the variable declaration.
+
+    /**
+     * ArrayVar nodes allow to distinguish between array and non-array variables. They define whether identifier
+     * next to them is an array or a simple variable of type defined at the beginning of the line.
+     *
+     * @param node represents a non-array variable.
+     */
     public void visit(IsNotArrayVar node) {
         node.struct = this.currentType != null ? this.currentType : Tab.noType;
     }
 
     // Changes the type of the array. Creates new struct node, does not create object node for array type.
+
+    /**
+     * ArrayVar nodes allow to distinguish between array and non-array variables. They define whether identifier
+     * next to them is an array or a simple variable of type defined at the beginning of the line. <br>
+     * ArrayVar creates a new struct node for each array, so they cannot be compared by reference equality.
+     * No object node is created for new array type.
+     *
+     * @param node represents an array variable
+     */
     public void visit(IsArrayVar node) {
         // TO-DO decide whether this check is appropriate at all based on syntax rules.
         if (this.errorDetector.noCurrentTypeSet(this.currentType, node)) {
@@ -147,7 +220,13 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         }
     }
 
-
+    /**
+     * Requires that there be no same identifier declaration in the same scope. <br>
+     * Inserts a new object node for the variable. <br>
+     * Type of variable is defined by the expected type, it's array-ability by the corresponding Array node in the AST.
+     *
+     * @param node
+     */
     public void visit(NextVariableDeclaration node) {
         if (this.errorDetector.identifierRedeclaration(node.getVarName(), node)) {
             return;
@@ -158,9 +237,14 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         node.obj.setLevel(this.currentMethod == null ? 0 : 1);
     }
 
-    // Provjerava da li je promjenljijva deklarisana u opsegu
-    // i ako nije dodaje je
-    // oslobadja this.constType.
+    /**
+     * Requires that there be no same identifier declaration in the same scope. <br>
+     * Inserts a new object node for the variable. <br>
+     * Type of variable is defined by the expected type, it's array-ability by the corresponding Array node in the AST. <br>
+     * Resets the expected type as it represents the end of line.
+     *
+     * @param node
+     */
     public void visit(VariableDeclaration node) {
         this.currentType = null;
         if (this.errorDetector.identifierRedeclaration(node.getVarName(), node)) {
@@ -173,22 +257,33 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 
     }
 
+    /**
+     * Requires that the type be already declared. <br>
+     * Requires that the declared identifier represent a type. <br>
+     * In case of absence, struct node set to noType.
+     *
+     * @param type
+     */
     public void visit(Type type) {
         type.struct = Tab.noType;
-        // type node must exist
         if (this.errorDetector.undeclaredIdentifier(type.getTypeName(), type)) return;
         Obj typeNode = Tab.find(type.getTypeName());
-        // type node must represent a type
         if (this.errorDetector.badKind(typeNode.getKind(), Obj.Type, type.getTypeName(), type)) return;
-        // only then set struct node's value
         type.struct = typeNode.getType();
     }
 
     // METHOD DECLARATIONS
 
-    // Provjerava da ime funkcije nije zauzeto i da nema ugnjezdjavanja funkcija
-    // Dodaje objektni cvor za funkciju i otvara novi opseg
-    // Po potrebi dodaje this
+    /**
+     * Requires that the function not be nested within another method. <br>
+     * Requires that identifier not be already declared within the same scope. <br>
+     * Declares a method within the current scope. <br>
+     * Distinguishes between global method and class method through fpPos. <br>
+     * Opens scope for the method variables. <br>
+     * Adds this-parameter to the scope if within class declaration. <br>
+     *
+     * @param node
+     */
     public void visit(FunctionTypeName node) {
         node.obj = Tab.noObj;
         if (this.errorDetector.isNested(node, this.currentMethod, null, null)) return;
@@ -198,20 +293,27 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         node.obj = this.currentMethod;
         Tab.openScope();
 
-        // Podrska za klase. Ako je metod unutar klase, dodaje se kao prvi parametar
-        // this
+        // No need to increment level when adding this-parameter as level is already incremented to 1 due to the method not
+        // being in the global scope.
         if (this.currentClass != null) {
             Tab.insert(Obj.Var, "this", this.currentClass.getType());
             // this.currentMethod.setLevel(this.currentMethod.getLevel()+1);
             report_info("Recognized method  " + this.currentMethod.getName() +
                     " of class " + this.currentClass.getName(), node);
         }
-        report_info("Processing function " + node.getFunctionName(), node);
+        report_info("Processing function " + node.obj.getName(), node);
     }
 
-    // Provjerava da ime procedure nije zauzeto i da nema ugnjezdjavanja procedura
-    // Dodaje objektni cvor za proceduru i otvara novi opseg
-    // Po potrebi dodaje this
+    /**
+     * Requires that the procedure not be nested within another procedure. <br>
+     * Requires that identifier not be already declared within the same scope. <br>
+     * Declares a method within the current scope. <br>
+     * Distinguishes between global method and class method through fpPos. <br>
+     * Opens scope for the method variables. <br>
+     * Adds this-parameter to the scope if within class declaration. <br>
+     *
+     * @param node
+     */
     public void visit(ProcedureTypeName node) {
         node.obj = Tab.noObj;
         if (this.errorDetector.isNested(node, this.currentMethod, null, null)) return;
@@ -228,32 +330,61 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         report_info("Processing the procedure " + node.getProcedureName(), node);
     }
 
+    /**
+     * Propagates method object node upwards.
+     *
+     * @param node
+     */
     public void visit(FunctionSignature node) {
         node.obj = node.getFunctionTypeName().obj;
     }
 
+    /**
+     * Propagates method object node upwards
+     *
+     * @param node
+     */
     public void visit(ProcedureSignature node) {
         node.obj = node.getProcedureTypeName().obj;
     }
 
-    // Postavlja tip formalnog parametra u constType.
+    /**
+     * Puts formal parameter type into the currentType variable. <br>
+     * currentType will be used and saved locally within ArrayVar node.
+     *
+     * @param node
+     */
     public void visit(FormParsType node) {
         this.currentType = node.getType().struct;
     }
 
-    // Resetuje se constType.
-    // Dodaje se novi parametar ako nije potrebno redeklarisanje
+
+    /**
+     * Resets current type. <br>
+     * Requires that identifier not be already declared within the scope. <br>
+     * Inserts a new variable object node with type defined in ArrayVar <br>
+     * Updates the number of formal parameters for the method. <br>
+     *
+     * @param node
+     */
     public void visit(FormalParametersList node) {
         node.obj = Tab.noObj;
         this.currentType = null; // was needed by arrayVar, already used when visiting this node.
-        if (this.errorDetector.identifierRedeclaration(node.getFormParName(), node)) return;
+        if (this.errorDetector.identifierRedeclaration(node.getFormParName(), node))
+            return; // PARAMETERS WITH SAME NAME
         node.obj = Tab.insert(Obj.Var, node.getFormParName(), node.getArrayVar().struct);
         this.currentMethod.setLevel(this.currentMethod.getLevel() + 1);
         report_info("Declared parameter " + node.getFormParName() + " of method " + this.currentMethod.getName(), node);
     }
 
-    // Resetuje se constType
-    // Dodaje se novi parametar ako nije potrebno redeklarisanje
+    /**
+     * Resets current type. <br>
+     * Requires that identifier not be already declared within the scope. <br>
+     * Inserts a new variable object node with type defined in ArrayVar <br>
+     * Updates the number of formal parameters for the method. <br>
+     *
+     * @param node
+     */
     public void visit(FormalParameter node) {
         node.obj = Tab.noObj;
         this.currentType = null;
@@ -263,25 +394,12 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         report_info("Declared parameter " + node.getFormParName() + " of method " + this.currentMethod.getName(), node);
     }
 
-    // Vraca objektni cvor metode kojoj pripada cvor
-	/*private Obj findMethod(SyntaxNode node) {
-		SyntaxNode parent = node.getParent();
-		while (!(parent instanceof MethodDeclaration) && (parent != null)) {
-			parent = parent.getParent();
-		}
-		if (parent == null) {
-			return Tab.noObj;
-		}
-		MethodDeclaration method = (MethodDeclaration)parent;
-		if (method.getMethodSignature() instanceof FunctionSignature)
-			return ((FunctionSignature)method.getMethodSignature()).getFunctionTypeName().obj;
-		if (method.getMethodSignature() instanceof ProcedureSignature) 
-			return ((ProcedureSignature)method.getMethodSignature()).getProcedureTypeName().obj;
-		report_error("Greska", node);
-		return Tab.noObj;
-	} */
-
-
+    /**
+     * Requires that return statement be within a function. <br>
+     * Requires that the type of return statement be assignable to the return type of the function <br>
+     *
+     * @param node
+     */
     public void visit(ReturnStatement node) {
         Obj expression = node.getExprOrNone().obj;
         Obj my_method = this.currentMethod;
@@ -289,26 +407,37 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         this.errorDetector.assignableTo(expression.getType(), my_method.getType(), node);
     }
 
+    /**
+     * Closes the scope of the method. <br>
+     * Requires that overriding be correct, in case of overriding. <br>
+     * Requires that the method contain return if function. <br>
+     * Saves method object node.<br>
+     * Resets current method variable. <br>
+     *
+     * @param node
+     */
     public void visit(MethodDeclaration node) {
-        node.obj = Tab.noObj;
+        node.obj = this.currentMethod;
         Tab.chainLocalSymbols(this.currentMethod);
         Tab.closeScope();
-
         if (this.currentClass != null && this.currentClass.getType().getElemType() != null) {
-            // correct override?
             this.errorDetector.isProperOverriding(this.currentClass, this.currentMethod, node);
         }
-
-        node.obj = this.currentMethod;
-
         this.errorDetector.functionContainsReturn(node);
 
-        report_info("Finished processing of method " + this.currentMethod.getName(), node);
+        report_info("Finished processing of method " + node.obj.getName(), node);
         this.currentMethod = null;
 
     }
 
-    // CLASS DECLARATION
+    /**
+     * Requires that class not be nested in another method, class or interface. <br>
+     * Creates a new type object node for class. <br>
+     * Opens a new scope for the class. <br>
+     * Adds a zeroth field for virtual pointer table. <br>
+     *
+     * @param node
+     */
     public void visit(ClassDeclStart node) {
         if (this.errorDetector.isNested(node, this.currentMethod, this.currentClass, this.currentInterface)) return;
         this.currentClass = Tab.insert(Obj.Type, node.getClassName(), new Struct(Struct.Class, new HashTableDataStructure()));
@@ -317,7 +446,17 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         report_info("Processing class " + node.getClassName(), node);
     }
 
+    /**
+     * Requires that the type being extended be already declared. <br>
+     * Requires that the type be either class or interface (extensible). <br>
+     * If extending interface: adds interface to list of implemented interfaces. <br>
+     * If extending class: adds base class as element type for the inherited class.
+     * Copies the fields (not methods!).
+     * Copies interfaces implemented in base class.
+     * @param node
+     */
     public void visit(ExtendsDeclaration node) {
+        if (this.errorDetector.undeclaredIdentifier(node.getType().getTypeName(), node)) return;
         Obj type_node = Tab.find(node.getType().getTypeName());
         if (!this.errorDetector.isExtensible(type_node.getType(), node)) return;
 
@@ -342,11 +481,22 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         report_info("Inherited attributes of class " + node.getType().getTypeName(), node);
     }
 
+    /**
+     * Wraps up class declaration. <br>
+     * Closes the scope. <br>
+     * Adds all fields defined in the base and new class. <br>
+     * Adds all methods. If inherited, modifies the type of this-parameter. <br>
+     * If redefined, picks redefinitions over base-class definitions. <br>
+     * Adds all other methods, specific to the new class. <br>
+     * Requires that all methods from interface be implemented. <br>
+     * @param node
+     */
+
     public void visit(ClassDeclaration node) {
         node.obj = Tab.noObj;
         Tab.chainLocalSymbols(this.currentClass);
         var temp_table = new HashTableDataStructure();
-        // dodavanje polja u members
+        // add fields
         int offset = 0;
         for (Obj symbol : this.currentClass.getLocalSymbols()) {
             if ((symbol.getKind() == Obj.Fld || symbol.getKind() == Obj.Var)) {
@@ -355,19 +505,15 @@ public class SemanticAnalyzer extends VisitorAdaptor {
                 if (temp_table.insertKey(new_node)) {
                     offset++;
                 }
-                ;
             }
         }
 
-        // dodavanje metoda
-        // ako je klasa naslijedjena
+        // add methods from base class. Pick redefinitions if present.
         if (this.currentClass.getType().getElemType() != null) {
-            // za svaki od metoda natklase, ako takvi postoje
             for (Obj symbol : this.currentClass.getType().getElemType().getMembers()) {
                 if (symbol.getKind() == Obj.Meth) {
                     boolean added = false;
-                    // ukoliko je definisan metod istog imena u potklasi, dodaj taj dodefinisani
-                    // ispravnost konkretnog metoda je obavljena pri deklaraciji.
+                    // if this is an overriding, add the new definition
                     for (Obj local_symbol : this.currentClass.getLocalSymbols()) {
                         if (local_symbol.getName().equals(symbol.getName())) {
                             temp_table.insertKey(local_symbol);
@@ -375,16 +521,13 @@ public class SemanticAnalyzer extends VisitorAdaptor {
                             break;
                         }
                     }
+                    // else add old
                     if (!added) {
-                        // ukoliko se radi o metodu koji nije promijenjen u novoj definiciji, potrebno
-                        // je
-                        // samo ga prepisati, uz promjenu vrijednosti this.
+                        // modify this-parameter only
                         Obj new_method = new Obj(Obj.Meth, symbol.getName(), symbol.getType(), 0, symbol.getLevel());
                         new_method.setFpPos(1);
                         HashTableDataStructure locals = new HashTableDataStructure();
-                        // ovdje je potrebno prepisati sve lokalne promjenljive, ukljucujuci one koje
-                        // nisu formalni argumenti
-                        // zato sto ce se koristiti isti kod.
+                        // copy ALL variables, including local variables, as the exact same code will be used.
                         for (Obj elem : symbol.getLocalSymbols()) {
                             if (elem.getName().equals("this")) {
                                 locals.insertKey(new Obj(elem.getKind(), elem.getName(), this.currentClass.getType(),
@@ -401,9 +544,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
             }
         }
 
-        // Prethodni kod će da doda sve metode koji pripadaju natklasi i izabere
-        // odgovarajuću njihovu definiciju.
-        // Naredni kod dodaje samo preostale, novodefinisane metode.
+        // Add all newly defined, not yet added methods.
         for (Obj method : this.currentClass.getLocalSymbols()) {
             if (!temp_table.symbols().contains(method)) {
                 temp_table.insertKey(method);
@@ -413,7 +554,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         this.currentClass.getType().setMembers(temp_table);
         this.currentClass.setLocals(null);
         Tab.closeScope();
-        report_info("Zavrsena deklaracija klase " + this.currentClass.getName() + " sa brojem polja "
+        report_info("Successfully finished declaration of class " + this.currentClass.getName() + " with number of fields "
                 + this.currentClass.getType().getNumberOfFields(), node);
         node.obj = this.currentClass;
         this.currentClass = null;
@@ -421,6 +562,13 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 
     // INTERFACE DECLARATIONS
 
+    /**
+     * Creates a new object node for interface. Sets the current interface variable. <br>
+     * Requires that interface declaration not be nested within function, class or interface. <br>
+     * Requires that identifier not be already declared. <br>
+     * Opens interface scope. <br>
+     * @param node
+     */
     public void visit(InterfaceDeclStart node) {
         node.obj = Tab.noObj;
         if (this.errorDetector.isNested(node, currentMethod, currentClass, currentInterface)) return;
@@ -430,6 +578,11 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         report_info("Started declaration of interface " + node.getInterfaceName(), node);
     }
 
+    /**
+     * Finishes interface declaration. <br>
+     * Closes the scope. Clears the current interface variable. <br>
+     * @param node
+     */
     public void visit(InterfaceDecl node) {
         Tab.chainLocalSymbols(this.currentInterface.getType());
         Tab.closeScope();
@@ -438,13 +591,21 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         report_info("Finsihed declaration of interface " + node.obj.getName(), node);
     }
 
+    /**
+     * Sets fpPos to 1 in the method node to mark it as implemented.
+     * @param node
+     */
     public void visit(InterfaceMethodDeclaration node) {
         // ovo znaci da je metod vec implementiran
         node.obj = node.getMethodDecl().obj;
         node.obj.setFpPos(1);
+        report_info("Finished declaration of interface method " + node.obj.getName() + " " + node.obj.getFpPos(), node);
     }
 
-
+    /**
+     * Closes method scope. Sets fpPos to 0 in the method node to mark it as not implemented.
+     * @param node
+     */
     public void visit(InterfaceMethodSignature node) {
         // ovo znaci da metod nije implementiran.
         node.obj = node.getMethodSignature().obj;
@@ -557,7 +718,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         } else {
             field_node = designator.getType().getMembersTable().searchKey(node.getFieldName());
         }
-        if (this.errorDetector.nonExistentClassField(field_node, node)) return;
+        if (this.errorDetector.nonExistentClassMember(field_node, node)) return;
         node.obj = field_node;
     }
 
@@ -654,7 +815,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
         node.obj = Tab.noObj;
     }
 
-    // PREDEFINISANI METODI
+    // PREDEFINED METHODS
 
     public void visit(ReadStatement node) {
         Obj my_designator = node.getDesignatorList().obj;
@@ -692,7 +853,6 @@ public class SemanticAnalyzer extends VisitorAdaptor {
     public void visit(ActParam node) {
         node.obj = node.getExpr().obj;
     }
-
 
     public void visit(MethodCallDesignatorStatement node) {
         Obj method_called = node.getDesignatorList().obj;

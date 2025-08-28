@@ -73,7 +73,7 @@ public class SemanticErrorDetector {
 
     public boolean assignableTo(Struct src, Struct dest, SyntaxNode node) {
         if (src == dest) return true;
-        if (dest.isRefType() && src == Tab.nullType) return true;
+        if (this.isRefType(dest.getKind()) && src == Tab.nullType) return true;
         if (src.getKind() == Struct.Class && dest.getKind() == Struct.Class) {
             while (src.getElemType() != null) {
                 if (src.getElemType() == dest) return true;
@@ -109,7 +109,7 @@ public class SemanticErrorDetector {
         // Ovo pokriva skoro sve slucajeve, osim nizova, uporedjivanja klasa u hijerarhiji i uporedijvanja klase i interfejsa u kom je.
         if (s_1 == s_2) return true;
         // Ako je referenca, moze jedna od vrijednosti da bude null.
-        if (s_2.isRefType() && s_1 == Tab.nullType || s_1.isRefType() && s_2 == Tab.nullType) return true;
+        if (this.isRefType(s_2.getKind()) && s_1 == Tab.nullType || this.isRefType(s_1.getKind()) && s_2 == Tab.nullType) return true;
         // Ako su obje klase, moraju biti u istoj hijerarhiji
         if (s_1.getKind() == Struct.Class && s_2.getKind() == Struct.Class) {
             Struct s_1_temp = s_1;
@@ -140,7 +140,7 @@ public class SemanticErrorDetector {
         if (s_2.getKind() == Struct.Array && s_1.getKind() == Struct.Array) {
             return this.compatibleWith(s_1.getElemType(), s_2.getElemType(), node);
         }
-        report_error("Semantic error. Erroneous comparison.", node);
+        report_error("Semantic error. Erroneous comparison", node);
         return false;
     }
 
@@ -236,7 +236,7 @@ public class SemanticErrorDetector {
             for (Obj method : interface_.getMembers()) {
                 if (temp_table.searchKey(method.getName()) == null) {
                     if (method.getFpPos() == 0) {
-                        report_error("Semanticka error. Not implemented interface method " + method.getName(), node);
+                        report_error("Semantic error. Not implemented interface method " + method.getName(), node);
                         correct = false;
                     } else {
                         temp_table.insertKey(method);
@@ -308,7 +308,6 @@ public class SemanticErrorDetector {
     }
 
     private boolean containsReturn(MethodDeclaration node) {
-        node.obj = Tab.noObj;
         StatementList statements = node.getStatementList();
         if (statements instanceof NoStatementList) {
             return false;
@@ -333,7 +332,7 @@ public class SemanticErrorDetector {
 
     public boolean isProcedure(Obj meth, SyntaxNode node) {
         if (meth.getKind() == Obj.Meth && meth.getType() == Tab.noType) {
-            report_error("Semantic error. Method " + meth.getName() + "has no return value", node);
+            report_error("Semantic error. Method " + meth.getName() + " has no return value", node);
             return true;
         }
         return false;
@@ -452,9 +451,13 @@ public class SemanticErrorDetector {
         }
         return false;
     }
+
+    private boolean isRefType(int kind) {
+        return kind == Struct.Array || kind == Struct.Class || kind == Struct.Interface || kind == SemanticAnalyzer.setType.getKind();
+    }
     // It is checked before invocation that left and right operands are compatible
     public boolean badRelOp(Obj compatibleOperand, ConditionFactor node) {
-        if (compatibleOperand.getType().getKind() == Struct.Class || compatibleOperand.getType().getKind() == Struct.Array || compatibleOperand.getType().getKind() == Struct.Interface) {
+        if (this.isRefType(compatibleOperand.getType().getKind())) {
             Relop relop = ((ComparisonExpression) node.getRelExprOrNone()).getRelop();
             if (!(relop instanceof IsEqual) && !(relop instanceof IsNotEqual)) {
                 report_error("Semantic error. Reference types compared using operators other than == i !=",
@@ -495,8 +498,8 @@ public class SemanticErrorDetector {
                     continue;
                 } else {
                     if (parameter_types[form_par.getAdr()] == null) {
-                        report_error("Semantic error. Parameter " + form_par.getName() + " missing", node);
-                        continue;
+                        report_error("Semantic error. Not enough arguments passed", node);
+                        return;
                     }
                 }
 
@@ -515,7 +518,7 @@ public class SemanticErrorDetector {
         return false;
     }
 
-    public boolean nonExistentClassField(Obj field_node, MemberIdentifier node) {
+    public boolean nonExistentClassMember(Obj field_node, MemberIdentifier node) {
         if (field_node == null) {
             report_error("Semantic error. Non existent class member "
                     + node.getFieldName(), node);

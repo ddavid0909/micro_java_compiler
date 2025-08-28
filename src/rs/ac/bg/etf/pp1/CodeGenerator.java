@@ -856,7 +856,8 @@ public class CodeGenerator extends VisitorAdaptor {
 		}
 		if (node instanceof ConditionTermsList) {
 			return ((ConditionTermsList)node).getOrConditionList();
-		} else if (node instanceof OrConditions) {
+		}
+		if (node instanceof OrConditions) {
 			return ((OrConditions)node).getOrConditionList();
 		} 
 		return null;
@@ -868,7 +869,8 @@ public class CodeGenerator extends VisitorAdaptor {
 		}
 		if (node instanceof ConditionTerm) {
 			return ((ConditionTerm)node).getAndConditionList();
-		} else if (node instanceof AndConditions) {
+		}
+		if (node instanceof AndConditions) {
 			return ((AndConditions)node).getAndConditionList();
 		} 
 		return null;
